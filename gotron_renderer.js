@@ -327,7 +327,7 @@ function make_gotron_client() {
             if (new_width !== canvas.width || new_height !== canvas.height) {
                 canvas.width = new_width;
                 canvas.height = new_height;
-                that.go.stdin.write("resize " + new_width.toString() + " " + new_height.toString() +"\n");
+                that.send_resize();
             }
         }
         that.draw();
@@ -336,6 +336,10 @@ function make_gotron_client() {
 
     that.display_debug_message = function (s) {
         document.title = s;
+    };
+
+    that.send_resize = function () {
+        that.go.stdin.write("resize " + canvas.width.toString() + " " + canvas.height.toString() +"\n");
     };
 
     // Sound from Thomas Sturm: http://www.storiesinflight.com/html5/audio.html
@@ -361,7 +365,7 @@ function make_gotron_client() {
     };
 
     that.start = function() {
-        that.go.stdin.write("resize " + canvas.width.toString() + " " + canvas.height.toString() +"\n");
+        that.send_resize();
         that.init_sound();
         requestAnimationFrame(that.main);
     }
