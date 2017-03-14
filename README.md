@@ -6,7 +6,7 @@ A small library that allows Golang programs to draw to the screen by sending mes
 
 Usage:
 
-* Write a Go app that uses the Gotron API; for an example see `basic.go`, `electra.go`, or `swarmz.go`
+* Write a Go app that uses the Gotron API; for a simple example see `examples/basic.go`
 * Compile your Go app
 * Edit `gotron.cfg` to point to the executable
 * Run Electron in the directory, e.g. `electron .`
