@@ -1,9 +1,8 @@
 package main
 
 import (
-    "math"
     "time"
-    ws "../gotrongo"
+    engine "../gotrongo"
 )
 
 const (
@@ -11,59 +10,63 @@ const (
 )
 
 func main() {
-    ws.RegisterSprite("resources/space ship.png")
-    ws.RegisterSprite("resources/globe.png")
-    ws.RegisterSound("resources/shot.wav")
-    w, h := ws.Start(FPS)
 
-    WIDTH, HEIGHT := float64(w), float64(h)
+    // Set up the engine...
+
+    engine.RegisterSprite("resources/space ship.png")
+    engine.RegisterSound("resources/shot.wav")
+    engine.Start(FPS)                           // FPS is advisory only
+
+    // Get the Window size...
+
+    w, h := engine.GetWidthHeight()             // ints
+    width, height := float64(w), float64(h)
+
+    // Use a ticker to limit our framerate...
 
     var ticker = time.Tick(time.Second / FPS)
 
-    var x, y, speedx, speedy, angle float64 = 100, 100, 0, 0, 0
+    // Create a canvas and a soundscape...
 
-    c := ws.NewCanvas()
-    z := ws.NewSoundscape()
+    c := engine.NewCanvas()
+    z := engine.NewSoundscape()
+
+    // Set up our space ship...
+
+    var x, y, speedx, speedy float64 = 100, 100, 0, 0
 
     for {
+        c.Clear()       // Clear both the canvas...
+        z.Clear()       // ...and the soundscape (or sounds will repeat every frame)
 
-        c.Clear()
-        z.Clear()       // Or sounds will play repeatedly every frame...
+        // Move with WASD keys...
 
-        if ws.KeyDown("w") && speedy > -2 && y > 16          { speedy -= 0.1 }
-        if ws.KeyDown("a") && speedx > -2 && x > 16          { speedx -= 0.1 }
-        if ws.KeyDown("s") && speedy <  2 && y < HEIGHT - 16 { speedy += 0.1 }
-        if ws.KeyDown("d") && speedx <  2 && x <  WIDTH - 16 { speedx += 0.1 }
+        if engine.KeyDown("w") && speedy > -2 && y > 16          { speedy -= 0.1 }
+        if engine.KeyDown("a") && speedx > -2 && x > 16          { speedx -= 0.1 }
+        if engine.KeyDown("s") && speedy <  2 && y < height - 16 { speedy += 0.1 }
+        if engine.KeyDown("d") && speedx <  2 && x <  width - 16 { speedx += 0.1 }
 
-        if (x > WIDTH - 16 && speedx > 0) || (x < 16 && speedx < 0) {
+        // Bounce off walls...
+
+        if (x > width - 16 && speedx > 0) || (x < 16 && speedx < 0) {
             speedx *= -1
             z.PlaySound("resources/shot.wav")
         }
-        if (y > HEIGHT - 16 && speedy > 0) || (y < 16 && speedy < 0) {
+        if (y > height - 16 && speedy > 0) || (y < 16 && speedy < 0) {
             speedy *= -1
             z.PlaySound("resources/shot.wav")
         }
 
+        // Update position and add sprite to the canvas
+
         x += speedx
         y += speedy
-
-        angle += 0.03
-        orbiter_x := 50 * math.Cos(angle)
-        orbiter_y := 50 * math.Sin(angle)
-
-        c.AddLine("#ffff00", x, y, x + orbiter_x, y + orbiter_y, 0, 0)
         c.AddSprite("resources/space ship.png", x, y, speedx, speedy)
-        c.AddSprite("resources/globe.png", x + orbiter_x, y + orbiter_y, 0, 0)
-        c.AddText("Hello there: this works!", "#ffff00", 30, "Arial", x - orbiter_x, y - orbiter_y, 0, 0)
+
+        // Wait for next tick, then send info to the client window
 
         <- ticker
         c.Send()
         z.Send()
-
-        clicks := ws.PollClicks()
-        if len(clicks) > 0 {
-            last_click := clicks[len(clicks) - 1]
-            ws.SendDebug("Click at %d, %d", last_click[0], last_click[1])
-        }
     }
 }
