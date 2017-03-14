@@ -74,7 +74,7 @@ func Start(fps float64) (width int, height int) {
     eng.mutex.Lock()            // Really just for the .started var
     defer eng.mutex.Unlock()
 
-    config := load_config("config.json")
+    config := load_config("gotron.cfg")
 
     eng.width = config.Width
     eng.height = config.Height

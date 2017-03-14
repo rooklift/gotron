@@ -6,7 +6,7 @@ const alert = require("./modules/alert").alert;
 const fs = require('fs');
 
 electron.app.on("ready", () => {
-    const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+    const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
     windows.new(config.width, config.height, "file:", "gotron.html");
     menu_build();
 });
@@ -25,6 +25,15 @@ function menu_build() {
                     click: () => {
                         alert("Gotron: Golang graphics via Electron");
                     }
+                },
+                {
+                    role: "reload"
+                },
+                {
+                    role: "quit"
+                },
+                {
+                    type: "separator"
                 },
                 {
                     role: "toggledevtools"

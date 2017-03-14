@@ -5,7 +5,7 @@ const electron = require("electron");
 function alert_main(msg) {
     electron.dialog.showMessageBox({
         message: msg,
-        title: "Alert!",
+        title: "Alert",
         buttons: ["OK"]
     });
 }
@@ -13,7 +13,7 @@ function alert_main(msg) {
 function alert_renderer(msg) {
     electron.remote.dialog.showMessageBox({
         message: msg,
-        title: "Alert!",
+        title: "Alert",
         buttons: ["OK"]
     });
 }
