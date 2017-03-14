@@ -15,7 +15,7 @@ func main() {
 
     engine.RegisterSprite("resources/space ship.png")
     engine.RegisterSound("resources/shot.wav")
-    engine.Start(FPS)                           // FPS is advisory only
+    engine.Start(FPS)                           // FPS is advisory only. Very wrong values may cause visible stutter.
 
     // Get the Window size...
 
@@ -61,7 +61,7 @@ func main() {
 
         x += speedx
         y += speedy
-        c.AddSprite("resources/space ship.png", x, y, speedx, speedy)
+        c.AddSprite("resources/space ship.png", x, y, speedx, speedy)   // Speed values used for interpolation if needed
 
         // Wait for next tick, then send info to the client window
 
