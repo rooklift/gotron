@@ -1,6 +1,7 @@
 "use strict";
 
 const APP_FILE = "./electra.exe"
+const channel_max = 8;
 
 const spawn = require("child_process").spawn;
 const alert = require("./modules/alert").alert;         // Useful for debugging
@@ -14,18 +15,17 @@ let HEIGHT = window.innerHeight;
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
-let sprites = {};
-
 function start_gotron_client() {
 
     let that = {};
-    let channel_max = 8;
 
-    that.go_frames = 0;
-    that.total_draws = 0;
+    that.sprites = {};
+    that.sounds = {};
+
+    that.all_things = [];
+
     that.second_last_frame_time = Date.now() - 16;
     that.last_frame_time = Date.now();
-    that.all_things = [];
 
     that.go = spawn(APP_FILE);
 
@@ -101,7 +101,7 @@ function start_gotron_client() {
 
     // Setup keyboard and mouse...
 
-    document.addEventListener("keydown", function (evt) {
+    document.addEventListener("keydown", (evt) => {
         if (evt.key === " ") {
             that.go.stdin.write("keydown space\n");
         } else {
@@ -109,7 +109,7 @@ function start_gotron_client() {
         }
     });
 
-    document.addEventListener("keyup", function (evt) {
+    document.addEventListener("keyup", (evt) => {
         if (evt.key === " ") {
             that.go.stdin.write("keyup space\n");
         } else {
@@ -117,12 +117,10 @@ function start_gotron_client() {
         }
     });
 
-    canvas.addEventListener("mousedown", function (evt) {
-        let x;
-        let y;
-        x = evt.clientX - canvas.offsetLeft;
-        y = evt.clientY - canvas.offsetTop;
-        that.go.stdin.write("click " + x.toString() + " " + y.toString()) + "\n";
+    canvas.addEventListener("mousedown", (evt) => {
+        let x = evt.clientX - canvas.offsetLeft;
+        let y = evt.clientY - canvas.offsetTop;
+        that.go.stdin.write("click " + x.toString() + " " + y.toString() + "\n");
     });
 
     that.register_sprite = function (blob) {
@@ -132,8 +130,8 @@ function start_gotron_client() {
         let filename = elements[0];
         let varname = elements[1];
 
-        sprites[varname] = new Image();
-        sprites[varname].src = filename;
+        that.sprites[varname] = new Image();
+        that.sprites[varname].src = filename;
     }
 
     that.parse_point_or_sprite = function (blob) {
@@ -220,11 +218,11 @@ function start_gotron_client() {
         let x = sp.x + sp.speedx * time_offset / 1000;
         let y = sp.y + sp.speedy * time_offset / 1000;
 
-        if (sprites[sp.varname] === undefined) {
+        if (that.sprites[sp.varname] === undefined) {
             alert("Got bad sprite: " + sp.varname);
         }
 
-        virtue.drawImage(sprites[sp.varname], x - sprites[sp.varname].width / 2, y - sprites[sp.varname].height / 2);
+        virtue.drawImage(that.sprites[sp.varname], x - that.sprites[sp.varname].width / 2, y - that.sprites[sp.varname].height / 2);
     };
 
     that.draw_line = function (li, time_offset) {
@@ -250,7 +248,7 @@ function start_gotron_client() {
 
         let time_offset = Date.now() - that.last_frame_time;
 
-        // Cache letious things for speed reasons...
+        // Cache various things for speed reasons...
 
         let all_things = that.all_things;
         let len = all_things.length;
@@ -280,11 +278,6 @@ function start_gotron_client() {
     };
 
     that.animate = function () {
-
-        if (that.go_frames > 0) {
-            that.total_draws += 1;
-        }
-
         that.draw();
         requestAnimationFrame(that.animate);
     };

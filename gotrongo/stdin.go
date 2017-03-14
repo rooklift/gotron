@@ -9,15 +9,17 @@ import (
 
 func stdin_reader() {
 
-    // Handle incoming messages...
+    scanner := bufio.NewScanner(os.Stdin)
 
-    reader := bufio.NewReader(os.Stdin)
+    // logfile, _ := os.Create("stdin.txt")
 
     for {
 
-        bytes, _ := reader.ReadString('\n')        // FIXME: this may be vulnerable to malicious huge messages
-
-        fields := strings.Fields(string(bytes))
+        scanner.Scan()
+        fields := strings.Fields(scanner.Text())
+        
+        // logfile.WriteString(scanner.Text())
+        // logfile.WriteString("\n")
 
         switch fields[0] {
 
