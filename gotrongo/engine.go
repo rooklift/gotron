@@ -2,7 +2,9 @@ package wsworld
 
 import (
     "fmt"
+	"encoding/json"
     "html/template"
+    "io/ioutil"
     "strings"
     "sync"
 )
@@ -23,6 +25,8 @@ type engine struct {
 
     started         bool
     fps             float64
+    width           int
+    height          int
 
     // The following are written several times at the beginning, then only read from...
 
@@ -65,10 +69,15 @@ func RegisterSound(filename string) {
     fmt.Printf("s\x1e%s\x1fsound%d\n", filename, sound_id)
 }
 
-func Start(width, height int, fps float64) {
+func Start(fps float64) (width int, height int) {
 
     eng.mutex.Lock()            // Really just for the .started var
     defer eng.mutex.Unlock()
+
+    config := load_config("config.json")
+
+    eng.width = config.Width
+    eng.height = config.Height
 
     if eng.started {
         panic("wsengine.Start(): already started")
@@ -78,6 +87,8 @@ func Start(width, height int, fps float64) {
     eng.fps = fps
 
     go stdin_reader()
+
+    return config.Width, config.Height
 }
 
 func KeyDown(key string) bool {
@@ -99,6 +110,14 @@ func _keydown(key string, clear bool) bool {
     }
 
     return ret
+}
+
+func GetWidthHeight() (int, int) {
+
+    eng.mutex.Lock()
+    defer eng.mutex.Unlock()
+
+    return eng.width, eng.height
 }
 
 func PollClicks() [][]int {
@@ -135,4 +154,28 @@ func SendDebug(format_string string, args ...interface{}) {
     defer eng.mutex.Unlock()
 
     fmt.Printf(final)
+}
+
+
+type Config struct {
+	Executable     string      `json:"executable"`
+	Width          int         `json:"width"`
+	Height         int         `json:"height"`
+}
+
+func load_config(filename string) Config {
+
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic("Couldn't load config file")
+	}
+
+	var result Config
+	err = json.Unmarshal(file, &result)
+
+	if err != nil {
+		panic("Couldn't parse config file (bad JSON?)")
+	}
+
+	return result
 }

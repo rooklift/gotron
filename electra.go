@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     "math"
     "math/rand"
     "time"
@@ -10,9 +9,6 @@ import (
 
 const (
     FPS = 121
-    WIDTH = 1000
-    HEIGHT = 680
-
     SUBLINES = 40
     RAND_DIST = 40
     RADIUS = 380
@@ -28,12 +24,12 @@ type Line struct {
 func main() {
     ws.RegisterSprite("resources/globe.png")
     ws.RegisterSound("resources/shot.wav")
-    ws.Start(WIDTH, HEIGHT, FPS)
+    width, height := ws.Start(FPS)
 
     var ticker = time.Tick(time.Second / FPS)
 
-    var centre_x float64 = WIDTH / 2
-    var centre_y float64 = HEIGHT / 2
+    var centre_x float64 = float64(width) / 2
+    var centre_y float64 = float64(height) / 2
 
     c := ws.NewCanvas()
     z := ws.NewSoundscape()
@@ -94,7 +90,7 @@ func main() {
 
         clicks := ws.PollClicks()
         if len(clicks) > 0 {
-            ws.SendDebug(fmt.Sprintf("Click at %d, %d", clicks[len(clicks) - 1][0], clicks[len(clicks) - 1][1]))
+            ws.SendDebug("Click at %d, %d", clicks[len(clicks) - 1][0], clicks[len(clicks) - 1][1])
         }
 
         if ws.KeyDownClear("space") {

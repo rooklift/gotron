@@ -1,6 +1,26 @@
 "use strict";
 
-const APP_FILE = "./electra.exe"
+/*
+
+   Summary of the comms protocol:
+   Each message has a 1 char type indicator, followed by the blobs of the message.
+   The type indicator and the blobs are separated from each other by 0x1e (30).
+   The fields inside a blob are separated by 0x1f (31).
+
+   v (30) p (31) #ffffff (31) 25.2 (31) 54.7 (31) 2.2 (31) 1.3 (30) p (31) #ff0000 (31) 127.4 (31) 339.7 (31) -1.0 (31) 0.4
+   |   |                                                         |
+   |   |  ---------------------- blob ------------------------   |  ------------------------- blob ------------------------
+   |   |                                                         |
+   | recsep                                                    recsep
+   |
+  type
+
+*/
+
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+
+const APP_FILE = config.executable
 const channel_max = 8;
 
 const spawn = require("child_process").spawn;
@@ -9,8 +29,8 @@ const alert = require("./modules/alert").alert;         // Useful for debugging
 const canvas = document.querySelector("canvas");
 const virtue = canvas.getContext("2d");
 
-let WIDTH = window.innerWidth;
-let HEIGHT = window.innerHeight;
+let WIDTH = window.innerWidth;      // Set by the
+let HEIGHT = window.innerHeight;    // main process
 
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -130,6 +150,8 @@ function start_gotron_client() {
         let y = evt.clientY - canvas.offsetTop;
         that.go.stdin.write("click " + x.toString() + " " + y.toString() + "\n");
     });
+
+    // Parsers for individual blobs in a message...
 
     that.register_sprite = function (blob) {
 
