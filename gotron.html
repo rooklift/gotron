@@ -59,16 +59,18 @@ function make_gotron_client() {
     that.last_frame_time = Date.now();
 
     that.go = spawn(APP_FILE);
+    that.go.stdout.on("data", handle_data);
 
-    that.go.stdout.on("data", (data) => {
+    function handle_data(data) {
         let lines = data.toString().split("\n");
         for (let n = 0; n < lines.length; n++) {
             handle_line(lines[n]);
         }
-    });
+    }
 
     function handle_line(msg) {
-        let stuff = msg.split(String.fromCharCode(30));    // Our fields are split by ASCII 30 (record sep)
+        let splitter = String.fromCharCode(30)  // Our fields are split by ASCII 30 (record sep)
+        let stuff = msg.split(splitter);
 
         let len = stuff.length;
         if (len === 0) {
@@ -87,7 +89,7 @@ function make_gotron_client() {
             that.second_last_frame_time = that.last_frame_time;
             that.last_frame_time = Date.now();
 
-            for (let n = 1; n < len; n += 1) {
+            for (let n = 1; n < len; n++) {
 
                 switch (stuff[n].charAt(0)) {
 
@@ -108,7 +110,7 @@ function make_gotron_client() {
 
             // Deal with audio events..................................................................
 
-            for (let n = 1; n < len; n += 1) {
+            for (let n = 1; n < len; n++) {
                 that.play_multi_sound(stuff[n]);
             }
 
@@ -310,7 +312,7 @@ function make_gotron_client() {
         let draw_line = that.draw_line;
         let draw_text = that.draw_text;
 
-        for (let n = 0; n < len; n += 1) {
+        for (let n = 0; n < len; n++) {
 
             switch (all_things[n].type) {
             case "l":
@@ -349,7 +351,7 @@ function make_gotron_client() {
 
     that.play_multi_sound = function (s) {
         let thistime = Date.now()
-        for (let a = 0; a < that.audiochannels.length; a += 1) {
+        for (let a = 0; a < that.audiochannels.length; a++) {
             if (that.audiochannels[a].finished < thistime) {
                 that.audiochannels[a].finished = thistime + that.sounds[s].duration * 1000;
                 that.audiochannels[a].channel.src = that.sounds[s].src;
