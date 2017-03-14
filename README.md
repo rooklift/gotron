@@ -2,7 +2,7 @@
 
 A small library that allows Golang programs to draw to the screen by sending messages to an Electron (NodeJS) frontend.
 
-![Gotron Screenshot](/screenshot.gif?raw=true | width=624)
+![Gotron Screenshot](https://raw.githubusercontent.com/fohristiwhirl/gotron/master/screenshot.gif | width=624)
 
 Usage:
 
