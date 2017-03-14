@@ -37,6 +37,7 @@ func main() {
         // Get the Window size, which can change...
 
         width, height := engine.GetWidthHeightFloats()
+        engine.SendDebug("Window size: %d, %d", int(width), int(height))
 
         // Move with WASD keys...
 
