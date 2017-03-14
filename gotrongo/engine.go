@@ -13,7 +13,7 @@ var eng engine
 func init() {
     eng.sprites = make(map[string]string)
     eng.sounds = make(map[string]string)
-    eng.players = make(map[int]*player)
+    eng.keyboard = make(map[string]bool)
 }
 
 type engine struct {
@@ -24,10 +24,6 @@ type engine struct {
 
     started         bool
     fps             float64
-    res_path_local  string
-    title           string
-    static          string
-    multiplayer     bool
 
     // The following are written several times at the beginning, then only read from...
 
@@ -36,12 +32,6 @@ type engine struct {
 
     // Written often...
 
-    players         map[int]*player
-    latest_player   int
-}
-
-type player struct {
-    pid             int
     keyboard        map[string]bool
     clicks          [][]int
 }
@@ -70,10 +60,13 @@ func RegisterSound(filename string) {
         panic("RegisterSound(): already started")
     }
 
-    eng.sounds[filename] = fmt.Sprintf("sound%d", len(eng.sounds))
+    sound_id := len(eng.sounds)
+
+    eng.sounds[filename] = fmt.Sprintf("sound%d", sound_id)
+    fmt.Printf("s\x1e%s\x1fsound%d\n", filename, sound_id)
 }
 
-func Start(title string, width, height int, fps float64) {
+func Start(width, height int, fps float64) {
 
     eng.mutex.Lock()            // Really just for the .started var
     defer eng.mutex.Unlock()
@@ -83,44 +76,33 @@ func Start(title string, width, height int, fps float64) {
     }
 
     eng.started = true
-
-    eng.title = title
     eng.fps = fps
-    eng.multiplayer = false
 
     go stdin_reader()
 }
 
-func KeyDown(pid int, key string) bool {
-    return _keydown(pid, key, false)
+func KeyDown(key string) bool {
+    return _keydown(key, false)
 }
 
-func KeyDownClear(pid int, key string) bool {       // Clears the key after (sets it to false)
-    return _keydown(pid, key, true)
+func KeyDownClear(key string) bool {       // Clears the key after (sets it to false)
+    return _keydown(key, true)
 }
 
-func _keydown(pid int, key string, clear bool) bool {
+func _keydown(key string, clear bool) bool {
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    if pid == -1 {
-        pid = eng.latest_player
-    }
-
-    if eng.players[pid] == nil {
-        return false
-    }
-
-    ret := eng.players[pid].keyboard[key]
+    ret := eng.keyboard[key]
 
     if clear {
-        eng.players[pid].keyboard[key] = false
+        eng.keyboard[key] = false
     }
 
     return ret
 }
 
-func PollClicks(pid int) [][]int {
+func PollClicks() [][]int {
 
     // Return a slice containing every click since the last time this function was called.
     // Then clear the clicks from memory.
@@ -128,52 +110,23 @@ func PollClicks(pid int) [][]int {
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    if pid == -1 {
-        pid = eng.latest_player
-    }
-
     var ret [][]int
 
-    if eng.players[pid] == nil {
-        return ret
-    }
-
-    for n := 0 ; n < len(eng.players[pid].clicks) ; n++ {
-        p := []int{eng.players[pid].clicks[n][0], eng.players[pid].clicks[n][1]}    // Each element is a length-2 slice of x,y.
+    for n := 0 ; n < len(eng.clicks) ; n++ {
+        p := []int{eng.clicks[n][0], eng.clicks[n][1]}    // Each element is a length-2 slice of x,y.
         ret = append(ret, p)
     }
 
-    eng.players[pid].clicks = nil
+    eng.clicks = nil
 
     return ret
 }
 
-func PlayerCount() int {
-
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
-
-    return len(eng.players)
-}
-
-func PlayerSet() map[int]bool {
-
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
-
-    set := make(map[int]bool)
-
-    for key, _ := range eng.players {       // Relies on us actually deleting players when they leave, not just setting them to nil
-        set[key] = true
-    }
-
-    return set
-}
-
-func SendDebugToAll(msg string) {
+func SendDebug(msg string) {
 
     msg = strings.Replace(msg, "\x1e", " ", -1)       // Replace meaningful characters in our protocol
     msg = strings.Replace(msg, "\x1f", " ", -1)
+    msg = strings.Replace(msg, "\n", " ", -1)
 
     b := []byte("d\x1e" + template.HTMLEscapeString(msg))
 
@@ -181,14 +134,4 @@ func SendDebugToAll(msg string) {
     defer eng.mutex.Unlock()
 
     os.Stdout.Write(b)
-}
-
-func slash_at_both_ends(s string) string {
-    if strings.HasPrefix(s, "/") == false {
-        s = "/" + s
-    }
-    if strings.HasSuffix(s, "/") == false {
-        s = s + "/"
-    }
-    return s
 }

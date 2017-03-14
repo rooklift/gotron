@@ -103,17 +103,17 @@ function start_gotron_client() {
 
     document.addEventListener("keydown", function (evt) {
         if (evt.key === " ") {
-            that.go.stdin.write("keydown space");
+            that.go.stdin.write("keydown space\n");
         } else {
-            that.go.stdin.write("keydown " + evt.key);
+            that.go.stdin.write("keydown " + evt.key + "\n");
         }
     });
 
     document.addEventListener("keyup", function (evt) {
         if (evt.key === " ") {
-            that.go.stdin.write("keyup space");
+            that.go.stdin.write("keyup space\n");
         } else {
-            that.go.stdin.write("keyup " + evt.key);
+            that.go.stdin.write("keyup " + evt.key + "\n");
         }
     });
 
@@ -122,7 +122,7 @@ function start_gotron_client() {
         let y;
         x = evt.clientX - canvas.offsetLeft;
         y = evt.clientY - canvas.offsetTop;
-        that.go.stdin.write("click " + x.toString() + " " + y.toString());
+        that.go.stdin.write("click " + x.toString() + " " + y.toString()) + "\n";
     });
 
     that.register_sprite = function (blob) {
@@ -303,13 +303,10 @@ function start_gotron_client() {
     };
 
     that.play_multi_sound = function (s) {
-        let a;
-        let thistime;
-
-        for (a = 0; a < that.audiochannels.length; a += 1) {
-            thistime = new Date();
-            if (that.audiochannels[a].finished < thistime.getTime()) {
-                that.audiochannels[a].finished = thistime.getTime() + document.getElementById(s).duration * 1000;
+        let thistime = Date.now()
+        for (let a = 0; a < that.audiochannels.length; a += 1) {
+            if (that.audiochannels[a].finished < thistime) {
+                that.audiochannels[a].finished = thistime + document.getElementById(s).duration * 1000;
                 that.audiochannels[a].channel.src = document.getElementById(s).src;
                 that.audiochannels[a].channel.load();
                 that.audiochannels[a].channel.play();

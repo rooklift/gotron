@@ -9,16 +9,6 @@ import (
 
 func stdin_reader() {
 
-    pid := 0
-
-    eng.mutex.Lock()
-
-    keyboard := make(map[string]bool)
-    eng.players[pid] = &player{pid, keyboard, nil}
-    eng.latest_player = pid
-
-    eng.mutex.Unlock()
-
     // Handle incoming messages...
 
     reader := bufio.NewReader(os.Stdin)
@@ -35,9 +25,7 @@ func stdin_reader() {
 
             if len(fields) > 1 {
                 eng.mutex.Lock()
-                if eng.players[pid] != nil {
-                    eng.players[pid].keyboard[fields[1]] = false
-                }
+                eng.keyboard[fields[1]] = false
                 eng.mutex.Unlock()
             }
 
@@ -45,9 +33,7 @@ func stdin_reader() {
 
             if len(fields) > 1 {
                 eng.mutex.Lock()
-                if eng.players[pid] != nil {
-                    eng.players[pid].keyboard[fields[1]] = true
-                }
+                eng.keyboard[fields[1]] = true
                 eng.mutex.Unlock()
             }
 
@@ -59,9 +45,7 @@ func stdin_reader() {
                 y, _ := strconv.Atoi(fields[2])
 
                 eng.mutex.Lock()
-                if eng.players[pid] != nil {
-                    eng.players[pid].clicks = append(eng.players[pid].clicks, []int{x, y})
-                }
+                eng.clicks = append(eng.clicks, []int{x, y})
                 eng.mutex.Unlock()
             }
         }

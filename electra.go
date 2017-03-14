@@ -26,7 +26,7 @@ type Line struct {
 
 func main() {
     ws.RegisterSprite("resources/globe.png")
-    ws.Start("Electra", WIDTH, HEIGHT, FPS)
+    ws.Start(WIDTH, HEIGHT, FPS)
 
     var ticker = time.Tick(time.Second / FPS)
 
@@ -36,6 +36,7 @@ func main() {
     c := ws.NewCanvas()
 
     var angle float64
+    var additive float64 = 0.005
     var i int
 
     var lines []Line
@@ -44,7 +45,11 @@ func main() {
         i++
         c.Clear()
 
-        angle += 0.005
+        if ws.KeyDownClear("space") {
+            additive *= -1
+        }
+
+        angle += additive
         orbiter1_x := centre_x + RADIUS * math.Cos(angle)
         orbiter1_y := centre_y + RADIUS * math.Sin(angle)
         orbiter2_x := centre_x - RADIUS * math.Cos(angle)

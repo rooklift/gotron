@@ -97,6 +97,7 @@ func (w *Canvas) AddText(text, colour string, size int, font string, x, y, speed
     defer w.mutex.Unlock()
     text = strings.Replace(text, "\x1e", " ", -1)       // Replace meaningful characters in our protocol
     text = strings.Replace(text, "\x1f", " ", -1)
+    text = strings.Replace(text, "\n", " ", -1)
     w.entities = append(w.entities, fmt.Sprintf("t\x1f%s\x1f%d\x1f%s\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%s", colour, size, font, x, y, speedx, speedy, text))
 }
 
