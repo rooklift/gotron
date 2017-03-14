@@ -23,7 +23,7 @@ function menu_build() {
                 {
                     label: "About",
                     click: () => {
-                        alert("This is a test program.");
+                        alert("Gotron: Golang graphics via Electron");
                     }
                 },
                 {
