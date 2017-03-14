@@ -1,6 +1,6 @@
 # Gotron
 
-A small library that allows Golang programs to draw to the screen by sending messages to an Electron (NodeJS) frontend.
+A small library that allows Golang programs to draw to the screen by sending messages to an Electron (NodeJS) frontend. Also relays key presses and mouse clicks.
 
 ![Gotron Screenshot](https://raw.githubusercontent.com/fohristiwhirl/gotron/master/screenshot.gif)
 
