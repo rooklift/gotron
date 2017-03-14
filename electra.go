@@ -88,11 +88,6 @@ func main() {
         c.AddSprite("resources/globe.png", orbiter1_x, orbiter1_y, 0, 0)
         c.AddSprite("resources/globe.png", orbiter2_x, orbiter2_y, 0, 0)
 
-        clicks := ws.PollClicks()
-        if len(clicks) > 0 {
-            ws.SendDebug("Click at %d, %d", clicks[len(clicks) - 1][0], clicks[len(clicks) - 1][1])
-        }
-
         if ws.KeyDownClear("space") {
             additive *= -1
             z.PlaySound("resources/shot.wav")
