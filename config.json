@@ -1,5 +1,5 @@
 {
-    "executable": "basic.exe",
+    "executable": "examples/basic.exe",
     "width": 1600,
     "height": 900
 }

@@ -3,7 +3,7 @@ package main
 import (
     "math"
     "time"
-    ws "./gotrongo"
+    ws "../gotrongo"
 )
 
 const (

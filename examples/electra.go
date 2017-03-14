@@ -4,7 +4,7 @@ import (
     "math"
     "math/rand"
     "time"
-    ws "./gotrongo"
+    ws "../gotrongo"
 )
 
 const (
