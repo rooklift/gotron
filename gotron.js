@@ -96,6 +96,14 @@ function start_gotron_client() {
             if (len > 1) {
                 that.register_sprite(stuff[1]);
             }
+
+        } else if (frame_type === "s") {
+
+            // Register sounds.........................................................................
+
+            if (len > 1) {
+                that.register_sound(stuff[1]);
+            }
         }
     }
 
@@ -132,6 +140,17 @@ function start_gotron_client() {
 
         that.sprites[varname] = new Image();
         that.sprites[varname].src = filename;
+    }
+
+    that.register_sound = function (blob) {
+
+        let elements = blob.split(String.fromCharCode(31));
+
+        let filename = elements[0];
+        let varname = elements[1];
+
+        that.sounds[varname] = new Audio();
+        that.sounds[varname].src = filename;
     }
 
     that.parse_point_or_sprite = function (blob) {
@@ -299,8 +318,8 @@ function start_gotron_client() {
         let thistime = Date.now()
         for (let a = 0; a < that.audiochannels.length; a += 1) {
             if (that.audiochannels[a].finished < thistime) {
-                that.audiochannels[a].finished = thistime + document.getElementById(s).duration * 1000;
-                that.audiochannels[a].channel.src = document.getElementById(s).src;
+                that.audiochannels[a].finished = thistime + that.sounds[s].duration * 1000;
+                that.audiochannels[a].channel.src = that.sounds[s].src;
                 that.audiochannels[a].channel.load();
                 that.audiochannels[a].channel.play();
                 break;

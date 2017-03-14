@@ -2,7 +2,6 @@ package wsworld
 
 import (
     "fmt"
-    "os"
     "strings"
     "sync"
 )
@@ -22,7 +21,7 @@ func (w *Canvas) Clear() {
     defer w.mutex.Unlock()
     w.entities = []string{"v"}
 }
-func (w *Canvas) Bytes() []byte {
+func (w *Canvas) String() string {
 
     w.mutex.Lock()
     defer w.mutex.Unlock()
@@ -37,7 +36,7 @@ func (w *Canvas) Bytes() []byte {
         w.entities = append([]string{"v"}, w.entities...)
     }
 
-    return []byte(strings.Join(w.entities, "\x1e"))
+    return strings.Join(w.entities, "\x1e") + "\n"
 }
 
 type Soundscape struct {
@@ -54,7 +53,7 @@ func (z *Soundscape) Clear() {
     defer z.mutex.Unlock()
     z.soundqueue = []string{"a"}
 }
-func (z *Soundscape) Bytes() []byte {
+func (z *Soundscape) String() string {
 
     z.mutex.Lock()
     defer z.mutex.Unlock()
@@ -69,7 +68,7 @@ func (z *Soundscape) Bytes() []byte {
         z.soundqueue = append([]string{"a"}, z.soundqueue...)
     }
 
-    return []byte(strings.Join(z.soundqueue, "\x1e"))
+    return strings.Join(z.soundqueue, "\x1e") + "\n"
 }
 
 
@@ -117,26 +116,26 @@ func (z *Soundscape) PlaySound(filename string) {
     z.soundqueue = append(z.soundqueue, varname)
 }
 
-func (w *Canvas) SendToAll() {
+func (w *Canvas) Send() {
 
-    visual_message := w.Bytes()
+    visual_message := w.String()
 
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    os.Stdout.Write(visual_message)
+    fmt.Printf(visual_message)
 }
 
-func (z *Soundscape) SendToAll() {
+func (z *Soundscape) Send() {
 
-    sound_message := z.Bytes()  // Method has its own mutex call.
+    sound_message := z.String()
 
-    if len(sound_message) < 2 {
+    if len(sound_message) < 3 {
         return;
     }
 
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    os.Stdout.Write(sound_message)
+    fmt.Printf(sound_message)
 }

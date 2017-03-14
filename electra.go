@@ -27,6 +27,7 @@ type Line struct {
 
 func main() {
     ws.RegisterSprite("resources/globe.png")
+    ws.RegisterSound("resources/shot.wav")
     ws.Start(WIDTH, HEIGHT, FPS)
 
     var ticker = time.Tick(time.Second / FPS)
@@ -35,6 +36,7 @@ func main() {
     var centre_y float64 = HEIGHT / 2
 
     c := ws.NewCanvas()
+    z := ws.NewSoundscape()
 
     var angle float64
     var additive float64 = 0.005
@@ -45,10 +47,7 @@ func main() {
     for {
         i++
         c.Clear()
-
-        if ws.KeyDownClear("space") {
-            additive *= -1
-        }
+        z.Clear()
 
         angle += additive
         orbiter1_x := centre_x + RADIUS * math.Cos(angle)
@@ -98,8 +97,14 @@ func main() {
             ws.SendDebug(fmt.Sprintf("Click at %d, %d", clicks[len(clicks) - 1][0], clicks[len(clicks) - 1][1]))
         }
 
+        if ws.KeyDownClear("space") {
+            additive *= -1
+            z.PlaySound("resources/shot.wav")
+        }
+
         <- ticker
-        c.SendToAll()
+        c.Send()
+        z.Send()
     }
 }
 

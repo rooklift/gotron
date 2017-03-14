@@ -3,7 +3,6 @@ package wsworld
 import (
     "fmt"
     "html/template"
-    "os"
     "strings"
     "sync"
 )
@@ -122,16 +121,18 @@ func PollClicks() [][]int {
     return ret
 }
 
-func SendDebug(msg string) {
+func SendDebug(format_string string, args ...interface{}) {
+
+    msg := fmt.Sprintf(format_string, args...)
 
     msg = strings.Replace(msg, "\x1e", " ", -1)       // Replace meaningful characters in our protocol
     msg = strings.Replace(msg, "\x1f", " ", -1)
     msg = strings.Replace(msg, "\n", " ", -1)
 
-    b := []byte("d\x1e" + template.HTMLEscapeString(msg))
+    final := "d\x1e" + template.HTMLEscapeString(msg) + "\n"
 
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    os.Stdout.Write(b)
+    fmt.Printf(final)
 }
