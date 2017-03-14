@@ -120,6 +120,14 @@ func GetWidthHeight() (int, int) {
     return eng.width, eng.height
 }
 
+func GetWidthHeightFloats() (float64, float64) {
+
+    eng.mutex.Lock()
+    defer eng.mutex.Unlock()
+
+    return float64(eng.width), float64(eng.height)
+}
+
 func PollClicks() [][]int {
 
     // Return a slice containing every click since the last time this function was called.

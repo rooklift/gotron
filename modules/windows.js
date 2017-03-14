@@ -6,7 +6,7 @@ const alert = require("./alert").alert;
 
 const all = [];
 
-exports.new = (width, height, protocol, page) => {
+exports.new = (width, height, resizable, protocol, page) => {
 
     // The screen may be zoomed, we can compensate...
 
@@ -17,7 +17,7 @@ exports.new = (width, height, protocol, page) => {
         height: height * zoom_factor,
         backgroundColor: "#000000",
         useContentSize: true,
-        resizable: false,
+        resizable: resizable,
         webPreferences: { zoomFactor: zoom_factor }
     });
 

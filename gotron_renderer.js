@@ -22,7 +22,6 @@ function make_gotron_client() {
     const fs = require('fs');
     const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
 
-    const APP_FILE = config.executable
     const channel_max = 8;
 
     const spawn = require("child_process").spawn;
@@ -31,13 +30,14 @@ function make_gotron_client() {
     const canvas = document.querySelector("canvas");
     const virtue = canvas.getContext("2d");
 
-    let WIDTH = window.innerWidth;      // Set by the
-    let HEIGHT = window.innerHeight;    // main process
+    const REC_SEP = String.fromCharCode(30);
+    const UNIT_SEP = String.fromCharCode(31);
 
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     let that = {};
+    that.iteration = 0;
 
     that.sprites = {};
     that.sounds = {};
@@ -47,7 +47,7 @@ function make_gotron_client() {
     that.second_last_frame_time = Date.now() - 16;
     that.last_frame_time = Date.now();
 
-    that.go = spawn(APP_FILE);
+    that.go = spawn(config.executable);
     that.go.stdout.on("data", handle_data);
 
     function handle_data(data) {
@@ -58,8 +58,7 @@ function make_gotron_client() {
     }
 
     function handle_line(msg) {
-        let splitter = String.fromCharCode(30)  // Our fields are split by ASCII 30 (record sep)
-        let stuff = msg.split(splitter);
+        let stuff = msg.split(REC_SEP);
 
         let len = stuff.length;
         if (len === 0) {
@@ -157,7 +156,7 @@ function make_gotron_client() {
 
     that.register_sprite = function (blob) {
 
-        let elements = blob.split(String.fromCharCode(31));
+        let elements = blob.split(UNIT_SEP);
 
         let filename = elements[0];
         let varname = elements[1];
@@ -168,7 +167,7 @@ function make_gotron_client() {
 
     that.register_sound = function (blob) {
 
-        let elements = blob.split(String.fromCharCode(31));
+        let elements = blob.split(UNIT_SEP);
 
         let filename = elements[0];
         let varname = elements[1];
@@ -179,7 +178,7 @@ function make_gotron_client() {
 
     that.parse_point_or_sprite = function (blob) {
 
-        let elements = blob.split(String.fromCharCode(31));
+        let elements = blob.split(UNIT_SEP);
 
         let thing = {};
 
@@ -201,7 +200,7 @@ function make_gotron_client() {
 
     that.parse_line = function (blob) {
 
-        let elements = blob.split(String.fromCharCode(31));
+        let elements = blob.split(UNIT_SEP);
 
         let thing = {};
 
@@ -219,7 +218,7 @@ function make_gotron_client() {
 
     that.parse_text = function (blob) {
 
-        let elements = blob.split(String.fromCharCode(31));
+        let elements = blob.split(UNIT_SEP);
 
         if (elements.length < 9) {
             return;
@@ -283,7 +282,7 @@ function make_gotron_client() {
 
     that.draw = function () {
 
-        virtue.clearRect(0, 0, WIDTH, HEIGHT);     // The best way to clear the canvas??
+        virtue.clearRect(0, 0, canvas.width, canvas.height);     // The best way to clear the canvas??
 
         // As a relatively simple way of dealing with arbitrary timings of incoming data, we
         // always try to draw the object "where it is now" taking into account how long it's
@@ -291,7 +290,7 @@ function make_gotron_client() {
 
         let time_offset = Date.now() - that.last_frame_time;
 
-        // Cache various things for speed reasons...
+        // Cache various things for "speed" reasons (probably pointless).
 
         let all_things = that.all_things;
         let len = all_things.length;
@@ -320,9 +319,19 @@ function make_gotron_client() {
         }
     };
 
-    that.animate = function () {
+    that.main = function () {
+        that.iteration++;
+        if (that.iteration % 60 === 0) {
+            let new_width = window.innerWidth;
+            let new_height = window.innerHeight;
+            if (new_width !== canvas.width || new_height !== canvas.height) {
+                canvas.width = new_width;
+                canvas.height = new_height;
+                that.go.stdin.write("resize " + new_width.toString() + " " + new_height.toString() +"\n");
+            }
+        }
         that.draw();
-        requestAnimationFrame(that.animate);
+        requestAnimationFrame(that.main);
     };
 
     that.display_debug_message = function (s) {
@@ -352,8 +361,9 @@ function make_gotron_client() {
     };
 
     that.start = function() {
+        that.go.stdin.write("resize " + canvas.width.toString() + " " + canvas.height.toString() +"\n");
         that.init_sound();
-        requestAnimationFrame(that.animate);
+        requestAnimationFrame(that.main);
     }
 
     return that;

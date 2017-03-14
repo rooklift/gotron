@@ -17,11 +17,6 @@ func main() {
     engine.RegisterSound("resources/shot.wav")
     engine.Start(FPS)                           // FPS is advisory only. Very wrong values may cause visible stutter.
 
-    // Get the Window size...
-
-    w, h := engine.GetWidthHeight()             // ints
-    width, height := float64(w), float64(h)
-
     // Use a ticker to limit our framerate...
 
     var ticker = time.Tick(time.Second / FPS)
@@ -38,6 +33,10 @@ func main() {
     for {
         c.Clear()       // Clear both the canvas...
         z.Clear()       // ...and the soundscape (or sounds will repeat every frame)
+
+        // Get the Window size, which can change...
+
+        width, height := engine.GetWidthHeightFloats()
 
         // Move with WASD keys...
 

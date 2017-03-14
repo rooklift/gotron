@@ -23,14 +23,9 @@ type Line struct {
 func main() {
     ws.RegisterSprite("resources/globe.png")
     ws.RegisterSound("resources/shot.wav")
-    width, height := ws.Start(FPS)
-
-    var RADIUS = float64(height / 2)
+    ws.Start(FPS)
 
     var ticker = time.Tick(time.Second / FPS)
-
-    var centre_x float64 = float64(width) / 2
-    var centre_y float64 = float64(height) / 2
 
     c := ws.NewCanvas()
     z := ws.NewSoundscape()
@@ -46,11 +41,17 @@ func main() {
         c.Clear()
         z.Clear()
 
+        width, height := ws.GetWidthHeightFloats()
+        radius := height / 2
+
+        var centre_x float64 = float64(width) / 2
+        var centre_y float64 = float64(height) / 2
+
         angle += additive
-        orbiter1_x := centre_x + RADIUS * math.Cos(angle)
-        orbiter1_y := centre_y + RADIUS * math.Sin(angle)
-        orbiter2_x := centre_x - RADIUS * math.Cos(angle)
-        orbiter2_y := centre_y - RADIUS * math.Sin(angle)
+        orbiter1_x := centre_x + radius * math.Cos(angle)
+        orbiter1_y := centre_y + radius * math.Sin(angle)
+        orbiter2_x := centre_x - radius * math.Cos(angle)
+        orbiter2_y := centre_y - radius * math.Sin(angle)
 
         var x, y float64 = orbiter1_x, orbiter1_y
         var next_x, next_y float64

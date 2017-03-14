@@ -7,7 +7,7 @@ const fs = require('fs');
 
 electron.app.on("ready", () => {
     const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
-    windows.new(config.width, config.height, "file:", "gotron.html");
+    windows.new(config.width, config.height, config.resizable, "file:", "gotron.html");
     menu_build();
 });
 

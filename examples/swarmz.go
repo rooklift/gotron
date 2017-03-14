@@ -29,9 +29,11 @@ const (
 )
 
 type Sim struct {
-    queens []*Dood
-    beasts []*Dood
-    player *Player
+    width   float64
+    height  float64
+    queens  []*Dood
+    beasts  []*Dood
+    player  *Player
 }
 
 type Dood struct {
@@ -49,16 +51,13 @@ type Player struct {
     y float64
     speedx float64
     speedy float64
+    sim *Sim
 }
-
-var WIDTH, HEIGHT float64
 
 func main() {
 
     ws.RegisterSprite("resources/space ship.png")
-    w, h := ws.Start(FPS)
-
-    WIDTH, HEIGHT = float64(w), float64(h)
+    ws.Start(FPS)
 
     rand.Seed(time.Now().UTC().UnixNano())
 
@@ -82,38 +81,41 @@ func main() {
 
 func (s *Sim) Init() {
 
+    s.width, s.height = ws.GetWidthHeightFloats()
+
     newplayer := new(Player)
-    newplayer.x = WIDTH / 2
-    newplayer.y = HEIGHT / 2
+    newplayer.x = s.width / 2
+    newplayer.y = s.height / 2
+    newplayer.sim = s
     s.player = newplayer
 
     for n := 0 ; n < QUEENS ; n++ {
-        s.queens = append(s.queens, &Dood{WIDTH / 2, HEIGHT / 2, 0, 0, QUEEN, nil, s})
+        s.queens = append(s.queens, &Dood{s.width / 2, s.height / 2, 0, 0, QUEEN, nil, s})
     }
 
     for n := 0 ; n < BEASTS ; n++ {
-        s.beasts = append(s.beasts, &Dood{WIDTH / 2, HEIGHT / 2, 0, 0, BEAST, nil, s})
+        s.beasts = append(s.beasts, &Dood{s.width / 2, s.height / 2, 0, 0, BEAST, nil, s})
     }
 }
 
 func (s *Sim) Reset() {
 
-    s.player.x = WIDTH / 2
-    s.player.y = HEIGHT / 2
+    s.player.x = s.width / 2
+    s.player.y = s.height / 2
     s.player.speedx = 0
     s.player.speedy = 0
 
     for n := 0 ; n < QUEENS ; n++ {
-        s.queens[n].x = WIDTH / 2
-        s.queens[n].y = HEIGHT / 2
+        s.queens[n].x = s.width / 2
+        s.queens[n].y = s.height / 2
         s.queens[n].speedx = 0
         s.queens[n].speedy = 0
         s.queens[n].target = nil
     }
 
     for n := 0 ; n < BEASTS ; n++ {
-        s.beasts[n].x = WIDTH / 2
-        s.beasts[n].y = HEIGHT / 2
+        s.beasts[n].x = s.width / 2
+        s.beasts[n].y = s.height / 2
         s.beasts[n].speedx = 0
         s.beasts[n].speedy = 0
         s.beasts[n].target = nil
@@ -121,6 +123,8 @@ func (s *Sim) Reset() {
 }
 
 func (s *Sim) Iterate() {
+
+    s.width, s.height = ws.GetWidthHeightFloats()
 
     for _, d := range s.beasts {
         d.Move()
@@ -171,8 +175,8 @@ func (p *Player) Move() {
 
     // Bounce off walls...
 
-    if (x < 16 && speedx < 0) || (x >  WIDTH - 16 && speedx > 0) { speedx *= -1 }
-    if (y < 16 && speedy < 0) || (y > HEIGHT - 16 && speedy > 0) { speedy *= -1 }
+    if (x < 16 && speedx < 0) || (x > p.sim.width  - 16 && speedx > 0) { speedx *= -1 }
+    if (y < 16 && speedy < 0) || (y > p.sim.height - 16 && speedy > 0) { speedy *= -1 }
 
     // Throttle speed...
 
@@ -229,13 +233,13 @@ func (d *Dood) Move() {
     if (x < MARGIN) {
         speedx += rand.Float64() * 2
     }
-    if (x >= WIDTH - MARGIN) {
+    if (x >= d.sim.width - MARGIN) {
         speedx -= rand.Float64() * 2
     }
     if (y < MARGIN) {
         speedy += rand.Float64() * 2
     }
-    if (y >= HEIGHT - MARGIN) {
+    if (y >= d.sim.height - MARGIN) {
         speedy -= rand.Float64() * 2
     }
 

@@ -17,7 +17,7 @@ func stdin_reader() {
 
         scanner.Scan()
         fields := strings.Fields(scanner.Text())
-        
+
         // logfile.WriteString(scanner.Text())
         // logfile.WriteString("\n")
 
@@ -48,6 +48,16 @@ func stdin_reader() {
 
                 eng.mutex.Lock()
                 eng.clicks = append(eng.clicks, []int{x, y})
+                eng.mutex.Unlock()
+            }
+
+        case "resize":
+
+            if len(fields) > 2 {
+
+                eng.mutex.Lock()
+                eng.width, _ = strconv.Atoi(fields[1])
+                eng.height, _ = strconv.Atoi(fields[2])
                 eng.mutex.Unlock()
             }
         }
