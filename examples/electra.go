@@ -11,7 +11,6 @@ const (
     FPS = 121
     SUBLINES = 40
     RAND_DIST = 40
-    RADIUS = 380
 )
 
 type Line struct {
@@ -25,6 +24,8 @@ func main() {
     ws.RegisterSprite("resources/globe.png")
     ws.RegisterSound("resources/shot.wav")
     width, height := ws.Start(FPS)
+
+    var RADIUS = float64(height / 2)
 
     var ticker = time.Tick(time.Second / FPS)
 
