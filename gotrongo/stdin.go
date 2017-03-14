@@ -55,9 +55,12 @@ func stdin_reader() {
 
             if len(fields) > 2 {
 
+                width, _ := strconv.Atoi(fields[1])
+                height, _ := strconv.Atoi(fields[2])
+
                 eng.mutex.Lock()
-                eng.width, _ = strconv.Atoi(fields[1])
-                eng.height, _ = strconv.Atoi(fields[2])
+                eng.width = width
+                eng.height = height
                 eng.mutex.Unlock()
             }
         }
