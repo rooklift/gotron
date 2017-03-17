@@ -36,7 +36,7 @@ type engine struct {
     // Written often...
 
     keyboard        map[string]bool
-    clicks          [][]int
+    click           []int
 }
 
 func RegisterSprite(filename string) {
@@ -128,23 +128,15 @@ func GetWidthHeightFloats() (float64, float64) {
     return float64(eng.width), float64(eng.height)
 }
 
-func PollClicks() [][]int {
+func GetClick() []int {
 
-    // Return a slice containing every click since the last time this function was called.
-    // Then clear the clicks from memory.
+    // Return mouse click then delete it from memory.
 
     eng.mutex.Lock()
     defer eng.mutex.Unlock()
 
-    var ret [][]int
-
-    for n := 0 ; n < len(eng.clicks) ; n++ {
-        p := []int{eng.clicks[n][0], eng.clicks[n][1]}    // Each element is a length-2 slice of x,y.
-        ret = append(ret, p)
-    }
-
-    eng.clicks = nil
-
+    ret := eng.click
+    eng.click = nil
     return ret
 }
 

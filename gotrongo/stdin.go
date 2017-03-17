@@ -47,7 +47,7 @@ func stdin_reader() {
                 y, _ := strconv.Atoi(fields[2])
 
                 eng.mutex.Lock()
-                eng.clicks = append(eng.clicks, []int{x, y})
+                eng.click = []int{x, y}
                 eng.mutex.Unlock()
             }
 

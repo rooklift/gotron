@@ -17,6 +17,8 @@ func main() {
     engine.RegisterSound("resources/shot.wav")
     engine.Start(FPS)                           // FPS is advisory only. Very wrong values may cause visible stutter.
 
+    width, height := engine.GetWidthHeightFloats()
+
     // Use a ticker to limit our framerate...
 
     var ticker = time.Tick(time.Second / FPS)
@@ -36,8 +38,12 @@ func main() {
 
         // Get the Window size, which can change...
 
-        width, height := engine.GetWidthHeightFloats()
-        engine.SendDebug("Window size: %d, %d", int(width), int(height))
+        new_width, new_height := engine.GetWidthHeightFloats()
+        if new_width != width || new_height != height {
+            width = new_width
+            height = new_height
+            engine.SendDebug("Window size: %d, %d", int(width), int(height))
+        }
 
         // Move with WASD keys...
 
@@ -45,6 +51,13 @@ func main() {
         if engine.KeyDown("a") && speedx > -2 && x > 16          { speedx -= 0.1 }
         if engine.KeyDown("s") && speedy <  2 && y < height - 16 { speedy += 0.1 }
         if engine.KeyDown("d") && speedx <  2 && x <  width - 16 { speedx += 0.1 }
+
+        // Capture mouse clicks...
+
+        click := engine.GetClick()
+        if click != nil {
+            engine.SendDebug("Got click at %d, %d", click[0], click[1])
+        }
 
         // Bounce off walls...
 
