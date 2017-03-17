@@ -17,6 +17,12 @@ func init() {
     eng.keyboard = make(map[string]bool)
 }
 
+type click struct {
+    Button          int
+    X               int
+    Y               int
+}
+
 type engine struct {
 
     mutex           sync.Mutex
@@ -36,7 +42,7 @@ type engine struct {
     // Written often...
 
     keyboard        map[string]bool
-    click           []int
+    click           *click
 }
 
 func RegisterSprite(filename string) {
@@ -128,7 +134,7 @@ func GetWidthHeightFloats() (float64, float64) {
     return float64(eng.width), float64(eng.height)
 }
 
-func GetClick() []int {
+func GetClick() *click {
 
     // Return mouse click then delete it from memory.
 

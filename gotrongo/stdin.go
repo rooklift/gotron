@@ -41,13 +41,14 @@ func stdin_reader() {
 
         case "click":
 
-            if len(fields) > 2 {
+            if len(fields) > 3 {
 
-                x, _ := strconv.Atoi(fields[1])
-                y, _ := strconv.Atoi(fields[2])
+                button, _ := strconv.Atoi(fields[1])
+                x, _ := strconv.Atoi(fields[2])
+                y, _ := strconv.Atoi(fields[3])
 
                 eng.mutex.Lock()
-                eng.click = []int{x, y}
+                eng.click = &click{Button: button, X: x, Y: y}
                 eng.mutex.Unlock()
             }
 

@@ -149,7 +149,8 @@ function make_gotron_client() {
     canvas.addEventListener("mousedown", (evt) => {
         let x = evt.clientX - canvas.offsetLeft;
         let y = evt.clientY - canvas.offsetTop;
-        that.go.stdin.write("click " + x.toString() + " " + y.toString() + "\n");
+        let button = evt.button;
+        that.go.stdin.write("click " + button.toString() + " " + x.toString() + " " + y.toString() + "\n");
     });
 
     // Parsers for individual blobs in a message...

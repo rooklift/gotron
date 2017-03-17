@@ -56,7 +56,7 @@ func main() {
 
         click := engine.GetClick()
         if click != nil {
-            engine.SendDebug("Got click at %d, %d", click[0], click[1])
+            engine.SendDebug("Got click at %d, %d (button %d)", click.X, click.Y, click.Button)
         }
 
         // Bounce off walls...
