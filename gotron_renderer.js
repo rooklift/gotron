@@ -20,18 +20,17 @@
 function make_gotron_client() {
 
     const fs = require('fs');
-    const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
-
-    const channel_max = 8;
-
     const spawn = require("child_process").spawn;
     const alert = require("./modules/alert").alert;         // Useful for debugging
-
-    const canvas = document.querySelector("canvas");
-    const virtue = canvas.getContext("2d");
+    const readline = require("readline");
 
     const REC_SEP = String.fromCharCode(30);
     const UNIT_SEP = String.fromCharCode(31);
+
+    const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
+    const channel_max = 8;
+    const canvas = document.querySelector("canvas");
+    const virtue = canvas.getContext("2d");
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -48,17 +47,16 @@ function make_gotron_client() {
     that.last_frame_time = Date.now();
 
     that.go = spawn(config.executable);
-    that.go.stdout.on("data", handle_data);
 
-    function handle_data(data) {
-        let lines = data.toString().split("\n");
-        for (let n = 0; n < lines.length; n++) {
-            handle_line(lines[n]);
-        }
-    }
+    let scanner = readline.createInterface({
+        input: that.go.stdout,
+        output: undefined,
+        terminal: false
+    });
 
-    function handle_line(msg) {
-        let stuff = msg.split(REC_SEP);
+    scanner.on("line", (line) => {
+
+        let stuff = line.split(REC_SEP);
 
         let len = stuff.length;
         if (len === 0) {
@@ -126,7 +124,7 @@ function make_gotron_client() {
                 that.register_sound(stuff[1]);
             }
         }
-    }
+    });
 
     // Setup keyboard and mouse...
 
