@@ -19,13 +19,13 @@
 
 function make_gotron_client() {
 
+    const child_process = require("child_process");
     const fs = require('fs');
-    const spawn = require("child_process").spawn;
-    const alert = require("./modules/alert").alert;         // Useful for debugging
     const readline = require("readline");
+    const alert = require("./modules/alert").alert;         // Useful for debugging
 
-    const REC_SEP = String.fromCharCode(30);
-    const UNIT_SEP = String.fromCharCode(31);
+    const REC_SEP = "\x1e";
+    const UNIT_SEP = "\x1f";
 
     const config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
     const channel_max = 8;
@@ -46,7 +46,7 @@ function make_gotron_client() {
     that.second_last_frame_time = Date.now() - 16;
     that.last_frame_time = Date.now();
 
-    that.go = spawn(config.executable);
+    that.go = child_process.spawn(config.executable);
 
     let scanner = readline.createInterface({
         input: that.go.stdout,
