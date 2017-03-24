@@ -20,7 +20,7 @@
 function make_gotron_client() {
 
     const child_process = require("child_process");
-    const fs = require('fs');
+    const fs = require("fs");
     const readline = require("readline");
     const alert = require("./modules/alert").alert;         // Useful for debugging
 
