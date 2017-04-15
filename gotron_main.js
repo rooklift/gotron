@@ -23,7 +23,7 @@ function menu_build() {
                 {
                     label: "About",
                     click: () => {
-                        alert("Gotron: Golang graphics via Electron");
+                        alert("Gotron: Golang graphics via Electron " + process.versions.electron);
                     }
                 },
                 {
