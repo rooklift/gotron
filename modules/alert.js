@@ -15,7 +15,7 @@ function alert_renderer(msg) {
         message: msg.toString(),
         title: "Alert",
         buttons: ["OK"]
-    });
+    }, () => {});
 }
 
 function object_to_string(o) {

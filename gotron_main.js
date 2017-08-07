@@ -2,7 +2,7 @@
 
 const electron = require("electron");
 const windows = require("./modules/windows");
-const alert = require("./modules/alert").alert;
+const alert = require("./modules/alert");
 const fs = require('fs');
 
 electron.app.on("ready", () => {
