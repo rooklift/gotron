@@ -2,6 +2,11 @@
 
 const electron = require("electron");
 
+function object_to_string(o) {
+    let msg = JSON.stringify(o);
+    return msg;
+}
+
 function alert_main(msg) {
     electron.dialog.showMessageBox({
         message: msg.toString(),
@@ -18,15 +23,14 @@ function alert_renderer(msg) {
     }, () => {});
 }
 
-function object_to_string(o) {
-    let msg = JSON.stringify(o);
-    return msg;
-}
-
 module.exports = (msg) => {
     if (typeof(msg) === "object") {
         msg = object_to_string(msg);
     }
+    if (typeof(msg) === "undefined") {
+        msg = "undefined";
+    }
+    msg = msg.trim()
     if (process.type === "renderer") {
         alert_renderer(msg);
     } else {

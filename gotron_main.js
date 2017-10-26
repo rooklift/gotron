@@ -1,13 +1,14 @@
 "use strict";
 
 const electron = require("electron");
+const path = require("path");
 const windows = require("./modules/windows");
 const alert = require("./modules/alert");
 const fs = require('fs');
 
 electron.app.on("ready", () => {
     let config = JSON.parse(fs.readFileSync("gotron.cfg", "utf8"));
-    windows.new(config.width, config.height, config.resizable, "file:", "gotron.html");
+    windows.new(config.width, config.height, config.resizable, "file:", path.join(__dirname, "gotron.html"));
     menu_build();
 });
 
