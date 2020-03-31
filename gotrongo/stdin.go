@@ -1,4 +1,4 @@
-package wsworld
+package gotrongo
 
 import (
 	"bufio"
@@ -64,6 +64,18 @@ func stdin_reader() {
 				eng.height = height
 				eng.mutex.Unlock()
 			}
+
+		case "sync":
+
+			// Send a message down the sync_chan if anyone's waiting for it, otherwise discard.
+
+			select {
+			case sync_chan <- true:
+				// pass
+			default:
+				// pass
+			}
 		}
 	}
 }
+

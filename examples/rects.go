@@ -11,6 +11,7 @@ import (
 
 const (
 	FPS = 60
+	SIZE = 10
 )
 
 func main() {
@@ -18,25 +19,26 @@ func main() {
 	engine.Start(FPS)
 
 	width, height := engine.GetWidthHeightFloats()
-	ticker := time.Tick(time.Second / FPS)
 	c := engine.NewCanvas()
 
 	for {
 		c.Clear()
 
-		for x := 0.0; x < width; x += 3 {
-			for y := 0.0; y < height; y += 3 {
+		for x := 0.0; x < width; x += SIZE {
+			for y := 0.0; y < height; y += SIZE {
 				var col string
 				if rand.Intn(2) == 0 {
 					col = "red"
 				} else {
 					col = "black"
 				}
-				c.AddFrect(col, x, y, x + 3, y + 3, 0, 0)
+				c.AddFrect(col, x, y, x + SIZE, y + SIZE, 0, 0)
 			}
 		}
 
-		<- ticker
+		engine.Sync()
 		c.Send()
+
+		time.Sleep(2 * time.Second)
 	}
 }

@@ -1,4 +1,4 @@
-package wsworld
+package gotrongo
 
 import (
 	"fmt"

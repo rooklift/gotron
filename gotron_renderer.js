@@ -135,6 +135,16 @@ scanner.on("line", (line) => {
 	}
 });
 
+let err_scanner = readline.createInterface({
+	input: client.go.stderr,
+	output: undefined,
+	terminal: false
+});
+
+err_scanner.on("line", (line) => {
+	console.log(line);
+});
+
 // ------------------------------------------------------------------------------------------------------------------------
 
 client.parse_frect = (elements) => {
@@ -327,6 +337,7 @@ client.main = () => {
 		}
 	}
 	client.draw();
+	client.go.stdin.write("sync\n");
 	requestAnimationFrame(client.main);
 };
 

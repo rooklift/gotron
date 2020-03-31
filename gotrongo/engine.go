@@ -1,4 +1,4 @@
-package wsworld
+package gotrongo
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 )
 
 var eng engine
+var sync_chan chan bool = make(chan bool)
 
 func init() {
 	eng.sprites = make(map[string]string)
@@ -162,6 +163,9 @@ func SendDebug(format_string string, args ...interface{}) {
 	fmt.Printf(final)
 }
 
+func Sync() {		// Waits until the next frontend draw.
+	<- sync_chan
+}
 
 type Config struct {
 	Executable     string      `json:"executable"`
