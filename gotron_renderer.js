@@ -124,30 +124,6 @@ scanner.on("line", (line) => {
 	}
 });
 
-// Setup keyboard and mouse...
-
-document.addEventListener("keydown", (evt) => {
-	if (evt.key === " ") {
-		client.go.stdin.write("keydown space\n");
-	} else {
-		client.go.stdin.write("keydown " + evt.key + "\n");
-	}
-});
-
-document.addEventListener("keyup", (evt) => {
-	if (evt.key === " ") {
-		client.go.stdin.write("keyup space\n");
-	} else {
-		client.go.stdin.write("keyup " + evt.key + "\n");
-	}
-});
-
-canvas.addEventListener("mousedown", (evt) => {
-	let x = evt.clientX - canvas.offsetLeft;
-	let y = evt.clientY - canvas.offsetTop;
-	client.go.stdin.write("click " + evt.button.toString() + " " + x.toString() + " " + y.toString() + "\n");
-});
-
 // Parsers for individual blobs in a message...
 
 client.register_sprite = (blob) => {
@@ -362,7 +338,31 @@ client.play_multi_sound = (s) => {
 	}
 };
 
-// ------------------------------------------------------------------------------------------------------------------------
+// Setup keyboard and mouse...
+
+document.addEventListener("keydown", (evt) => {
+	if (evt.key === " ") {
+		client.go.stdin.write("keydown space\n");
+	} else {
+		client.go.stdin.write("keydown " + evt.key + "\n");
+	}
+});
+
+document.addEventListener("keyup", (evt) => {
+	if (evt.key === " ") {
+		client.go.stdin.write("keyup space\n");
+	} else {
+		client.go.stdin.write("keyup " + evt.key + "\n");
+	}
+});
+
+canvas.addEventListener("mousedown", (evt) => {
+	let x = evt.clientX - canvas.offsetLeft;
+	let y = evt.clientY - canvas.offsetTop;
+	client.go.stdin.write("click " + evt.button.toString() + " " + x.toString() + " " + y.toString() + "\n");
+});
+
+// Start...
 
 client.send_resize();
 client.init_sound();
