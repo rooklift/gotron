@@ -4,7 +4,6 @@ package main
 
 import (
 	"math/rand"
-	"time"
 
 	engine "../gotrongo"
 )
@@ -38,7 +37,5 @@ func main() {
 
 		engine.Sync()
 		c.Send()
-
-		time.Sleep(2 * time.Second)
 	}
 }
