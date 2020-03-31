@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
-	"time"
 
 	engine "../gotrongo"
 )
@@ -25,9 +23,6 @@ func main() {
 	engine.RegisterSprite("resources/globe.png")
 	engine.RegisterSound("resources/shot.wav")
 	engine.Start(60)
-
-	syncs := 0		// For debugging...
-	start_time := time.Now()
 
 	c := engine.NewCanvas()
 	z := engine.NewSoundscape()
@@ -98,13 +93,6 @@ func main() {
 		}
 
 		engine.Sync()
-
-		syncs++
-		elapsed := time.Now().Sub(start_time).Seconds()
-
-		if elapsed > 0 {
-			engine.SendDebug(fmt.Sprintf("fps: %d", int(float64(syncs) / elapsed)))
-		}
 		c.Send()
 		z.Send()
 	}
