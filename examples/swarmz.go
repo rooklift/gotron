@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	FPS = 60
 	QUEENS = 8
 	BEASTS = 1900
 	BEAST_MAX_SPEED = 7
@@ -57,11 +56,9 @@ type Player struct {
 func main() {
 
 	ws.RegisterSprite("resources/space ship.png")
-	ws.Start(FPS)
+	ws.Start(60)
 
 	rand.Seed(time.Now().UTC().UnixNano())
-
-	var ticker = time.Tick(time.Second / FPS)
 
 	s := Sim{}
 	s.Init()
@@ -72,9 +69,8 @@ func main() {
 		s.Iterate()
 		c.Clear()
 		s.Draw(c)
-
-		<- ticker
-
+		
+		ws.Sync()
 		c.Send()
 	}
 }
