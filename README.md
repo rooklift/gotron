@@ -1,6 +1,6 @@
 # Gotron
 
-A small library that allows Golang programs to draw to the screen by sending messages to an Electron (NodeJS) frontend. Also relays key presses and mouse clicks.
+A small library that allows Golang programs to draw to the screen by sending messages to an Electron (NodeJS) frontend. Also relays key presses and mouse clicks. Not related to the more famous [Gotron project](https://github.com/Equanox/gotron).
 
 ![Gotron Screenshot](https://raw.githubusercontent.com/fohristiwhirl/gotron/master/examples/screenshot.gif)
 
@@ -15,5 +15,5 @@ A small library that allows Golang programs to draw to the screen by sending mes
 
 Roughly, there are 2 ways to keep a steady framerate:
 
-* Declare your intended framerate when calling Start(), or
-* Syncing with the front-end draws, with Sync()
+* Declare your intended framerate when calling `Start()` or
+* Syncing with the front-end draws, with `Sync()`
