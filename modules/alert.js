@@ -12,7 +12,7 @@ function alert_main(msg) {
 		message: msg.toString(),
 		title: "Alert",
 		buttons: ["OK"]
-	}, () => {});           // Providing a callback makes the window not block the process
+	}, () => {});			// Providing a callback makes the window not block the process
 }
 
 function alert_renderer(msg) {
@@ -24,6 +24,9 @@ function alert_renderer(msg) {
 }
 
 module.exports = (msg) => {
+	if (msg instanceof Error) {
+		msg = msg.toString();
+	}
 	if (typeof(msg) === "object") {
 		msg = object_to_string(msg);
 	}
@@ -39,4 +42,4 @@ module.exports = (msg) => {
 	} else {
 		alert_main(msg);
 	}
-}
+};
