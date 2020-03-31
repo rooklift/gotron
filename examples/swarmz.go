@@ -1,287 +1,287 @@
 package main
 
 import (
-    "math"
-    "math/rand"
-    "time"
+	"math"
+	"math/rand"
+	"time"
 
-    ws "../gotrongo"
+	ws "../gotrongo"
 )
 
 const (
-    FPS = 60
-    QUEENS = 8
-    BEASTS = 1900
-    BEAST_MAX_SPEED = 7
-    QUEEN_MAX_SPEED = 5.5
-    BEAST_ACCEL_MODIFIER = 0.55
-    QUEEN_ACCEL_MODIFIER = 0.7
-    QUEEN_TURN_PROB = 0.001
-    BEAST_TURN_PROB = 0.002
-    AVOID_STRENGTH = 4000
-    MAX_PLAYER_SPEED = 10
-    MARGIN = 50
+	FPS = 60
+	QUEENS = 8
+	BEASTS = 1900
+	BEAST_MAX_SPEED = 7
+	QUEEN_MAX_SPEED = 5.5
+	BEAST_ACCEL_MODIFIER = 0.55
+	QUEEN_ACCEL_MODIFIER = 0.7
+	QUEEN_TURN_PROB = 0.001
+	BEAST_TURN_PROB = 0.002
+	AVOID_STRENGTH = 4000
+	MAX_PLAYER_SPEED = 10
+	MARGIN = 50
 )
 
 const (
-    QUEEN = iota
-    BEAST
+	QUEEN = iota
+	BEAST
 )
 
 type Sim struct {
-    width   float64
-    height  float64
-    queens  []*Dood
-    beasts  []*Dood
-    player  *Player
+	width   float64
+	height  float64
+	queens  []*Dood
+	beasts  []*Dood
+	player  *Player
 }
 
 type Dood struct {
-    x float64
-    y float64
-    speedx float64
-    speedy float64
-    species int
-    target *Dood
-    sim *Sim
+	x float64
+	y float64
+	speedx float64
+	speedy float64
+	species int
+	target *Dood
+	sim *Sim
 }
 
 type Player struct {
-    x float64
-    y float64
-    speedx float64
-    speedy float64
-    sim *Sim
+	x float64
+	y float64
+	speedx float64
+	speedy float64
+	sim *Sim
 }
 
 func main() {
 
-    ws.RegisterSprite("resources/space ship.png")
-    ws.Start(FPS)
+	ws.RegisterSprite("resources/space ship.png")
+	ws.Start(FPS)
 
-    rand.Seed(time.Now().UTC().UnixNano())
+	rand.Seed(time.Now().UTC().UnixNano())
 
-    var ticker = time.Tick(time.Second / FPS)
+	var ticker = time.Tick(time.Second / FPS)
 
-    s := Sim{}
-    s.Init()
+	s := Sim{}
+	s.Init()
 
-    c := ws.NewCanvas()
+	c := ws.NewCanvas()
 
-    for {
-        s.Iterate()
-        c.Clear()
-        s.Draw(c)
+	for {
+		s.Iterate()
+		c.Clear()
+		s.Draw(c)
 
-        <- ticker
+		<- ticker
 
-        c.Send()
-    }
+		c.Send()
+	}
 }
 
 func (s *Sim) Init() {
 
-    s.width, s.height = ws.GetWidthHeightFloats()
+	s.width, s.height = ws.GetWidthHeightFloats()
 
-    newplayer := new(Player)
-    newplayer.x = s.width / 2
-    newplayer.y = s.height / 2
-    newplayer.sim = s
-    s.player = newplayer
+	newplayer := new(Player)
+	newplayer.x = s.width / 2
+	newplayer.y = s.height / 2
+	newplayer.sim = s
+	s.player = newplayer
 
-    for n := 0 ; n < QUEENS ; n++ {
-        s.queens = append(s.queens, &Dood{s.width / 2, s.height / 2, 0, 0, QUEEN, nil, s})
-    }
+	for n := 0 ; n < QUEENS ; n++ {
+		s.queens = append(s.queens, &Dood{s.width / 2, s.height / 2, 0, 0, QUEEN, nil, s})
+	}
 
-    for n := 0 ; n < BEASTS ; n++ {
-        s.beasts = append(s.beasts, &Dood{s.width / 2, s.height / 2, 0, 0, BEAST, nil, s})
-    }
+	for n := 0 ; n < BEASTS ; n++ {
+		s.beasts = append(s.beasts, &Dood{s.width / 2, s.height / 2, 0, 0, BEAST, nil, s})
+	}
 }
 
 func (s *Sim) Reset() {
 
-    s.player.x = s.width / 2
-    s.player.y = s.height / 2
-    s.player.speedx = 0
-    s.player.speedy = 0
+	s.player.x = s.width / 2
+	s.player.y = s.height / 2
+	s.player.speedx = 0
+	s.player.speedy = 0
 
-    for n := 0 ; n < QUEENS ; n++ {
-        s.queens[n].x = s.width / 2
-        s.queens[n].y = s.height / 2
-        s.queens[n].speedx = 0
-        s.queens[n].speedy = 0
-        s.queens[n].target = nil
-    }
+	for n := 0 ; n < QUEENS ; n++ {
+		s.queens[n].x = s.width / 2
+		s.queens[n].y = s.height / 2
+		s.queens[n].speedx = 0
+		s.queens[n].speedy = 0
+		s.queens[n].target = nil
+	}
 
-    for n := 0 ; n < BEASTS ; n++ {
-        s.beasts[n].x = s.width / 2
-        s.beasts[n].y = s.height / 2
-        s.beasts[n].speedx = 0
-        s.beasts[n].speedy = 0
-        s.beasts[n].target = nil
-    }
+	for n := 0 ; n < BEASTS ; n++ {
+		s.beasts[n].x = s.width / 2
+		s.beasts[n].y = s.height / 2
+		s.beasts[n].speedx = 0
+		s.beasts[n].speedy = 0
+		s.beasts[n].target = nil
+	}
 }
 
 func (s *Sim) Iterate() {
 
-    s.width, s.height = ws.GetWidthHeightFloats()
+	s.width, s.height = ws.GetWidthHeightFloats()
 
-    for _, d := range s.beasts {
-        d.Move()
-    }
-    for _, d := range s.queens {
-        d.Move()
-    }
-    s.player.Move()
+	for _, d := range s.beasts {
+		d.Move()
+	}
+	for _, d := range s.queens {
+		d.Move()
+	}
+	s.player.Move()
 
-    if ws.KeyDownClear("r") {
-        s.Reset()
-        ws.SendDebug("Reset by Player")
-    }
+	if ws.KeyDownClear("r") {
+		s.Reset()
+		ws.SendDebug("Reset by Player")
+	}
 }
 
 func (s *Sim) Draw(c *ws.Canvas) {
 
-    for _, dood := range s.beasts {
-        c.AddPoint("#00ff00", dood.x, dood.y, dood.speedx, dood.speedy)
-    }
+	for _, dood := range s.beasts {
+		c.AddPoint("#00ff00", dood.x, dood.y, dood.speedx, dood.speedy)
+	}
 
-    c.AddSprite("resources/space ship.png", s.player.x, s.player.y, s.player.speedx, s.player.speedy)
+	c.AddSprite("resources/space ship.png", s.player.x, s.player.y, s.player.speedx, s.player.speedy)
 }
 
 func (p *Player) Move() {
 
-    x, y, speedx, speedy := p.x, p.y, p.speedx, p.speedy
+	x, y, speedx, speedy := p.x, p.y, p.speedx, p.speedy
 
-    // Respond to input...
+	// Respond to input...
 
-    if ws.KeyDown("w") { speedy -= 0.2 }
-    if ws.KeyDown("a") { speedx -= 0.2 }
-    if ws.KeyDown("s") { speedy += 0.2 }
-    if ws.KeyDown("d") { speedx += 0.2 }
+	if ws.KeyDown("w") { speedy -= 0.2 }
+	if ws.KeyDown("a") { speedx -= 0.2 }
+	if ws.KeyDown("s") { speedy += 0.2 }
+	if ws.KeyDown("d") { speedx += 0.2 }
 
-    if ws.KeyDown("space") {
-        if speedx < 0.1 && speedx > -0.1 {
-            speedx = 0
-        } else {
-            speedx *= 0.95
-        }
-        if speedy < 0.1 && speedy > -0.1 {
-            speedy = 0
-        } else {
-            speedy *= 0.95
-        }
-    }
+	if ws.KeyDown("space") {
+		if speedx < 0.1 && speedx > -0.1 {
+			speedx = 0
+		} else {
+			speedx *= 0.95
+		}
+		if speedy < 0.1 && speedy > -0.1 {
+			speedy = 0
+		} else {
+			speedy *= 0.95
+		}
+	}
 
-    // Bounce off walls...
+	// Bounce off walls...
 
-    if (x < 16 && speedx < 0) || (x > p.sim.width  - 16 && speedx > 0) { speedx *= -1 }
-    if (y < 16 && speedy < 0) || (y > p.sim.height - 16 && speedy > 0) { speedy *= -1 }
+	if (x < 16 && speedx < 0) || (x > p.sim.width  - 16 && speedx > 0) { speedx *= -1 }
+	if (y < 16 && speedy < 0) || (y > p.sim.height - 16 && speedy > 0) { speedy *= -1 }
 
-    // Throttle speed...
+	// Throttle speed...
 
-    speed := math.Sqrt(speedx * speedx + speedy * speedy)
+	speed := math.Sqrt(speedx * speedx + speedy * speedy)
 
-    if speed > MAX_PLAYER_SPEED {
-        speedx *= MAX_PLAYER_SPEED / speed
-        speedy *= MAX_PLAYER_SPEED / speed
-    }
+	if speed > MAX_PLAYER_SPEED {
+		speedx *= MAX_PLAYER_SPEED / speed
+		speedy *= MAX_PLAYER_SPEED / speed
+	}
 
-    // Update entity...
+	// Update entity...
 
-    p.speedx = speedx
-    p.speedy = speedy
-    p.x += speedx
-    p.y += speedy
+	p.speedx = speedx
+	p.speedy = speedy
+	p.x += speedx
+	p.y += speedy
 }
 
 func (d *Dood) Move() {
 
-    x, y, speedx, speedy := d.x, d.y, d.speedx, d.speedy
+	x, y, speedx, speedy := d.x, d.y, d.speedx, d.speedy
 
-    var turnprob, maxspeed, accelmod float64
-    switch d.species {
-    case QUEEN:
-        turnprob = QUEEN_TURN_PROB
-        maxspeed = QUEEN_MAX_SPEED
-        accelmod = QUEEN_ACCEL_MODIFIER
-    case BEAST:
-        turnprob = BEAST_TURN_PROB
-        maxspeed = BEAST_MAX_SPEED
-        accelmod = BEAST_ACCEL_MODIFIER
-    }
+	var turnprob, maxspeed, accelmod float64
+	switch d.species {
+	case QUEEN:
+		turnprob = QUEEN_TURN_PROB
+		maxspeed = QUEEN_MAX_SPEED
+		accelmod = QUEEN_ACCEL_MODIFIER
+	case BEAST:
+		turnprob = BEAST_TURN_PROB
+		maxspeed = BEAST_MAX_SPEED
+		accelmod = BEAST_ACCEL_MODIFIER
+	}
 
-    // Chase target...
+	// Chase target...
 
-    if d.target == nil || rand.Float64() < turnprob || d.target == d {
-        tar_id := rand.Intn(QUEENS)
-        d.target = d.sim.queens[tar_id]
-    }
+	if d.target == nil || rand.Float64() < turnprob || d.target == d {
+		tar_id := rand.Intn(QUEENS)
+		d.target = d.sim.queens[tar_id]
+	}
 
-    vecx, vecy := unit_vector(x, y, d.target.x, d.target.y)
+	vecx, vecy := unit_vector(x, y, d.target.x, d.target.y)
 
-    if vecx == 0 && vecy == 0 {
-        speedx += (rand.Float64() * 2 - 1) * accelmod
-        speedy += (rand.Float64() * 2 - 1) * accelmod
-    } else {
-        speedx += vecx * rand.Float64() * accelmod
-        speedy += vecy * rand.Float64() * accelmod
-    }
+	if vecx == 0 && vecy == 0 {
+		speedx += (rand.Float64() * 2 - 1) * accelmod
+		speedy += (rand.Float64() * 2 - 1) * accelmod
+	} else {
+		speedx += vecx * rand.Float64() * accelmod
+		speedy += vecy * rand.Float64() * accelmod
+	}
 
-    // Wall avoidance...
+	// Wall avoidance...
 
-    if (x < MARGIN) {
-        speedx += rand.Float64() * 2
-    }
-    if (x >= d.sim.width - MARGIN) {
-        speedx -= rand.Float64() * 2
-    }
-    if (y < MARGIN) {
-        speedy += rand.Float64() * 2
-    }
-    if (y >= d.sim.height - MARGIN) {
-        speedy -= rand.Float64() * 2
-    }
+	if (x < MARGIN) {
+		speedx += rand.Float64() * 2
+	}
+	if (x >= d.sim.width - MARGIN) {
+		speedx -= rand.Float64() * 2
+	}
+	if (y < MARGIN) {
+		speedy += rand.Float64() * 2
+	}
+	if (y >= d.sim.height - MARGIN) {
+		speedy -= rand.Float64() * 2
+	}
 
-    // Player avoidance...
+	// Player avoidance...
 
-    dx := d.sim.player.x - x
-    dy := d.sim.player.y - y
+	dx := d.sim.player.x - x
+	dy := d.sim.player.y - y
 
-    distance_squared := dx * dx + dy * dy
-    distance := math.Sqrt(distance_squared)
+	distance_squared := dx * dx + dy * dy
+	distance := math.Sqrt(distance_squared)
 
-    if distance > 1 {
-        adjusted_force := AVOID_STRENGTH / (distance_squared * distance)
-        speedx -= dx * adjusted_force * rand.Float64()
-        speedy -= dy * adjusted_force * rand.Float64()
-    }
+	if distance > 1 {
+		adjusted_force := AVOID_STRENGTH / (distance_squared * distance)
+		speedx -= dx * adjusted_force * rand.Float64()
+		speedy -= dy * adjusted_force * rand.Float64()
+	}
 
-    // Throttle speed...
+	// Throttle speed...
 
-    speed := math.Sqrt(speedx * speedx + speedy * speedy)
+	speed := math.Sqrt(speedx * speedx + speedy * speedy)
 
-    if speed > maxspeed {
-        speedx *= maxspeed / speed
-        speedy *= maxspeed / speed
-    }
+	if speed > maxspeed {
+		speedx *= maxspeed / speed
+		speedy *= maxspeed / speed
+	}
 
-    // Update entity...
+	// Update entity...
 
-    d.speedx = speedx
-    d.speedy = speedy
-    d.x += speedx
-    d.y += speedy
+	d.speedx = speedx
+	d.speedy = speedy
+	d.x += speedx
+	d.y += speedy
 }
 
 func unit_vector(x1, y1, x2, y2 float64) (float64, float64) {
-    dx := x2 - x1
-    dy := y2 - y1
+	dx := x2 - x1
+	dy := y2 - y1
 
-    if (dx < 0.01 && dx > -0.01 && dy < 0.01 && dy > -0.01) {
-        return 0, 0
-    }
+	if (dx < 0.01 && dx > -0.01 && dy < 0.01 && dy > -0.01) {
+		return 0, 0
+	}
 
-    distance := math.Sqrt(dx * dx + dy * dy)
-    return dx / distance, dy / distance
+	distance := math.Sqrt(dx * dx + dy * dy)
+	return dx / distance, dy / distance
 }

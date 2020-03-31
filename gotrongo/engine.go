@@ -1,165 +1,165 @@
 package wsworld
 
 import (
-    "fmt"
+	"fmt"
 	"encoding/json"
-    "html/template"
-    "io/ioutil"
-    "strings"
-    "sync"
+	"html/template"
+	"io/ioutil"
+	"strings"
+	"sync"
 )
 
 var eng engine
 
 func init() {
-    eng.sprites = make(map[string]string)
-    eng.sounds = make(map[string]string)
-    eng.keyboard = make(map[string]bool)
+	eng.sprites = make(map[string]string)
+	eng.sounds = make(map[string]string)
+	eng.keyboard = make(map[string]bool)
 }
 
 type click struct {
-    Button          int
-    X               int
-    Y               int
+	Button          int
+	X               int
+	Y               int
 }
 
 type engine struct {
 
-    mutex           sync.Mutex
+	mutex           sync.Mutex
 
-    // The following are written once only...
+	// The following are written once only...
 
-    started         bool
-    fps             float64
-    width           int
-    height          int
+	started         bool
+	fps             float64
+	width           int
+	height          int
 
-    // The following are written several times at the beginning, then only read from...
+	// The following are written several times at the beginning, then only read from...
 
-    sprites         map[string]string       // filename -> JS varname
-    sounds          map[string]string       // filename -> JS varname
+	sprites         map[string]string       // filename -> JS varname
+	sounds          map[string]string       // filename -> JS varname
 
-    // Written often...
+	// Written often...
 
-    keyboard        map[string]bool
-    click           *click
+	keyboard        map[string]bool
+	click           *click
 }
 
 func RegisterSprite(filename string) {
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    if eng.started {
-        panic("RegisterSprite(): already started")
-    }
+	if eng.started {
+		panic("RegisterSprite(): already started")
+	}
 
-    sprite_id := len(eng.sprites)
+	sprite_id := len(eng.sprites)
 
-    eng.sprites[filename] = fmt.Sprintf("sprite%d", sprite_id)
-    fmt.Printf("r\x1e%s\x1fsprite%d\n", filename, sprite_id)
+	eng.sprites[filename] = fmt.Sprintf("sprite%d", sprite_id)
+	fmt.Printf("r\x1e%s\x1fsprite%d\n", filename, sprite_id)
 }
 
 func RegisterSound(filename string) {
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    if eng.started {
-        panic("RegisterSound(): already started")
-    }
+	if eng.started {
+		panic("RegisterSound(): already started")
+	}
 
-    sound_id := len(eng.sounds)
+	sound_id := len(eng.sounds)
 
-    eng.sounds[filename] = fmt.Sprintf("sound%d", sound_id)
-    fmt.Printf("s\x1e%s\x1fsound%d\n", filename, sound_id)
+	eng.sounds[filename] = fmt.Sprintf("sound%d", sound_id)
+	fmt.Printf("s\x1e%s\x1fsound%d\n", filename, sound_id)
 }
 
 func Start(fps float64) (width int, height int) {
 
-    eng.mutex.Lock()            // Really just for the .started var
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()            // Really just for the .started var
+	defer eng.mutex.Unlock()
 
-    config := load_config("gotron.cfg")
+	config := load_config("gotron.cfg")
 
-    eng.width = config.Width
-    eng.height = config.Height
+	eng.width = config.Width
+	eng.height = config.Height
 
-    if eng.started {
-        panic("wsengine.Start(): already started")
-    }
+	if eng.started {
+		panic("wsengine.Start(): already started")
+	}
 
-    eng.started = true
-    eng.fps = fps
+	eng.started = true
+	eng.fps = fps
 
-    go stdin_reader()
+	go stdin_reader()
 
-    return config.Width, config.Height
+	return config.Width, config.Height
 }
 
 func KeyDown(key string) bool {
-    return _keydown(key, false)
+	return _keydown(key, false)
 }
 
 func KeyDownClear(key string) bool {       // Clears the key after (sets it to false)
-    return _keydown(key, true)
+	return _keydown(key, true)
 }
 
 func _keydown(key string, clear bool) bool {
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    ret := eng.keyboard[key]
+	ret := eng.keyboard[key]
 
-    if clear {
-        eng.keyboard[key] = false
-    }
+	if clear {
+		eng.keyboard[key] = false
+	}
 
-    return ret
+	return ret
 }
 
 func GetWidthHeight() (int, int) {
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    return eng.width, eng.height
+	return eng.width, eng.height
 }
 
 func GetWidthHeightFloats() (float64, float64) {
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    return float64(eng.width), float64(eng.height)
+	return float64(eng.width), float64(eng.height)
 }
 
 func GetClick() *click {
 
-    // Return mouse click then delete it from memory.
+	// Return mouse click then delete it from memory.
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    ret := eng.click
-    eng.click = nil
-    return ret
+	ret := eng.click
+	eng.click = nil
+	return ret
 }
 
 func SendDebug(format_string string, args ...interface{}) {
 
-    msg := fmt.Sprintf(format_string, args...)
+	msg := fmt.Sprintf(format_string, args...)
 
-    msg = strings.Replace(msg, "\x1e", " ", -1)       // Replace meaningful characters in our protocol
-    msg = strings.Replace(msg, "\x1f", " ", -1)
-    msg = strings.Replace(msg, "\n", " ", -1)
+	msg = strings.Replace(msg, "\x1e", " ", -1)       // Replace meaningful characters in our protocol
+	msg = strings.Replace(msg, "\x1f", " ", -1)
+	msg = strings.Replace(msg, "\n", " ", -1)
 
-    final := "d\x1e" + template.HTMLEscapeString(msg) + "\n"
+	final := "d\x1e" + template.HTMLEscapeString(msg) + "\n"
 
-    eng.mutex.Lock()
-    defer eng.mutex.Unlock()
+	eng.mutex.Lock()
+	defer eng.mutex.Unlock()
 
-    fmt.Printf(final)
+	fmt.Printf(final)
 }
 
 

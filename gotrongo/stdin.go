@@ -1,69 +1,69 @@
 package wsworld
 
 import (
-    "bufio"
-    "os"
-    "strconv"
-    "strings"
+	"bufio"
+	"os"
+	"strconv"
+	"strings"
 )
 
 func stdin_reader() {
 
-    scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 
-    // logfile, _ := os.Create("stdin.txt")
+	// logfile, _ := os.Create("stdin.txt")
 
-    for {
+	for {
 
-        scanner.Scan()
-        fields := strings.Fields(scanner.Text())
+		scanner.Scan()
+		fields := strings.Fields(scanner.Text())
 
-        // logfile.WriteString(scanner.Text())
-        // logfile.WriteString("\n")
+		// logfile.WriteString(scanner.Text())
+		// logfile.WriteString("\n")
 
-        switch fields[0] {
+		switch fields[0] {
 
-        case "keyup":
+		case "keyup":
 
-            if len(fields) > 1 {
-                eng.mutex.Lock()
-                eng.keyboard[fields[1]] = false
-                eng.mutex.Unlock()
-            }
+			if len(fields) > 1 {
+				eng.mutex.Lock()
+				eng.keyboard[fields[1]] = false
+				eng.mutex.Unlock()
+			}
 
-        case "keydown":
+		case "keydown":
 
-            if len(fields) > 1 {
-                eng.mutex.Lock()
-                eng.keyboard[fields[1]] = true
-                eng.mutex.Unlock()
-            }
+			if len(fields) > 1 {
+				eng.mutex.Lock()
+				eng.keyboard[fields[1]] = true
+				eng.mutex.Unlock()
+			}
 
-        case "click":
+		case "click":
 
-            if len(fields) > 3 {
+			if len(fields) > 3 {
 
-                button, _ := strconv.Atoi(fields[1])
-                x, _ := strconv.Atoi(fields[2])
-                y, _ := strconv.Atoi(fields[3])
+				button, _ := strconv.Atoi(fields[1])
+				x, _ := strconv.Atoi(fields[2])
+				y, _ := strconv.Atoi(fields[3])
 
-                eng.mutex.Lock()
-                eng.click = &click{Button: button, X: x, Y: y}
-                eng.mutex.Unlock()
-            }
+				eng.mutex.Lock()
+				eng.click = &click{Button: button, X: x, Y: y}
+				eng.mutex.Unlock()
+			}
 
-        case "resize":
+		case "resize":
 
-            if len(fields) > 2 {
+			if len(fields) > 2 {
 
-                width, _ := strconv.Atoi(fields[1])
-                height, _ := strconv.Atoi(fields[2])
+				width, _ := strconv.Atoi(fields[1])
+				height, _ := strconv.Atoi(fields[2])
 
-                eng.mutex.Lock()
-                eng.width = width
-                eng.height = height
-                eng.mutex.Unlock()
-            }
-        }
-    }
+				eng.mutex.Lock()
+				eng.width = width
+				eng.height = height
+				eng.mutex.Unlock()
+			}
+		}
+	}
 }

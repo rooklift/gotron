@@ -1,5 +1,5 @@
 {
-  "name"    : "Gotron",
-  "version" : "0.1.0",
-  "main"    : "gotron_main.js"
+	"name"    : "Gotron",
+	"version" : "0.1.0",
+	"main"    : "gotron_main.js"
 }
