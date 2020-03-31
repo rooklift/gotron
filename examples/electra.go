@@ -1,14 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
-	ws "../gotrongo"
+
+	engine "../gotrongo"
 )
 
 const (
-	FPS = 121
 	SUBLINES = 40
 	RAND_DIST = 40
 )
@@ -21,14 +22,15 @@ type Line struct {
 }
 
 func main() {
-	ws.RegisterSprite("resources/globe.png")
-	ws.RegisterSound("resources/shot.wav")
-	ws.Start(FPS)
+	engine.RegisterSprite("resources/globe.png")
+	engine.RegisterSound("resources/shot.wav")
+	engine.Start(60)
 
-	var ticker = time.Tick(time.Second / FPS)
+	syncs := 0		// For debugging...
+	start_time := time.Now()
 
-	c := ws.NewCanvas()
-	z := ws.NewSoundscape()
+	c := engine.NewCanvas()
+	z := engine.NewSoundscape()
 
 	var angle float64
 	var additive float64 = 0.005
@@ -41,7 +43,7 @@ func main() {
 		c.Clear()
 		z.Clear()
 
-		width, height := ws.GetWidthHeightFloats()
+		width, height := engine.GetWidthHeightFloats()
 		radius := height / 2
 
 		var centre_x float64 = float64(width) / 2
@@ -90,12 +92,19 @@ func main() {
 		c.AddSprite("resources/globe.png", orbiter1_x, orbiter1_y, 0, 0)
 		c.AddSprite("resources/globe.png", orbiter2_x, orbiter2_y, 0, 0)
 
-		if ws.KeyDownClear("space") {
+		if engine.KeyDownClear("space") {
 			additive *= -1
 			z.PlaySound("resources/shot.wav")
 		}
 
-		<- ticker
+		engine.Sync()
+
+		syncs++
+		elapsed := time.Now().Sub(start_time).Seconds()
+
+		if elapsed > 0 {
+			engine.SendDebug(fmt.Sprintf("fps: %d", int(float64(syncs) / elapsed)))
+		}
 		c.Send()
 		z.Send()
 	}
