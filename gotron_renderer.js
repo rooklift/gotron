@@ -79,6 +79,9 @@ scanner.on("line", (line) => {
 
 			switch (elements[0]) {
 
+			case "f":
+				client.parse_frect(elements);
+				break;
 			case "l":
 				client.parse_line(elements);
 				break;
@@ -134,6 +137,32 @@ scanner.on("line", (line) => {
 
 // ------------------------------------------------------------------------------------------------------------------------
 
+client.parse_frect = (elements) => {
+	client.all_things.push({
+		type:		elements[0],
+		colour:		elements[1],
+		x1:			parseFloat(elements[2]),
+		y1:			parseFloat(elements[3]),
+		x2:			parseFloat(elements[4]),
+		y2:			parseFloat(elements[5]),
+		speedx:		parseFloat(elements[6]),
+		speedy:		parseFloat(elements[7]),
+	});
+};
+
+client.parse_line = (elements) => {
+	client.all_things.push({
+		type:		elements[0],
+		colour:		elements[1],
+		x1:			parseFloat(elements[2]),
+		y1:			parseFloat(elements[3]),
+		x2:			parseFloat(elements[4]),
+		y2:			parseFloat(elements[5]),
+		speedx:		parseFloat(elements[6]),
+		speedy:		parseFloat(elements[7]),
+	});
+};
+
 client.parse_point = (elements) => {
 	client.all_things.push({
 		type:		elements[0],
@@ -153,19 +182,6 @@ client.parse_sprite = (elements) => {
 		y:			parseFloat(elements[3]),
 		speedx:		parseFloat(elements[4]),
 		speedy:		parseFloat(elements[5]),
-	});
-};
-
-client.parse_line = (elements) => {
-	client.all_things.push({
-		type:		elements[0],
-		colour:		elements[1],
-		x1:			parseFloat(elements[2]),
-		y1:			parseFloat(elements[3]),
-		x2:			parseFloat(elements[4]),
-		y2:			parseFloat(elements[5]),
-		speedx:		parseFloat(elements[6]),
-		speedy:		parseFloat(elements[7]),
 	});
 };
 
@@ -206,13 +222,33 @@ client.register_sound = (elements) => {
 
 // ------------------------------------------------------------------------------------------------------------------------
 
-client.draw_text = (t, time_offset) => {
-	let x = Math.floor(t.x + t.speedx * time_offset / 1000);
-	let y = Math.floor(t.y + t.size / 2 + t.speedy * time_offset / 1000);
-	virtue.fillStyle = t.colour;
-	virtue.textAlign = "center";
-	virtue.font = t.size.toString() + "px " + t.font;
-	virtue.fillText(t.text, x, y);
+client.draw_frect = (r, time_offset) => {
+
+	if (r.x2 < r.x1) {
+		[r.x1, r.x2] = [r.x2, r.x1];
+	}
+	if (r.y2 < r.y1) {
+		[r.y1, r.y2] = [r.y2, r.y1];
+	}
+
+	let width = r.x2 - r.x1;
+	let height = r.y2 - r.y1;
+
+	virtue.fillStyle = r.colour;
+	virtue.fillRect(r.x1, r.y1, width, height); 
+}
+
+client.draw_line = (li, time_offset) => {
+	let x1 = li.x1 + li.speedx * time_offset / 1000;
+	let y1 = li.y1 + li.speedy * time_offset / 1000;
+	let x2 = li.x2 + li.speedx * time_offset / 1000;
+	let y2 = li.y2 + li.speedy * time_offset / 1000;
+
+	virtue.strokeStyle = li.colour;
+	virtue.beginPath();
+	virtue.moveTo(x1, y1);
+	virtue.lineTo(x2, y2);
+	virtue.stroke();
 };
 
 client.draw_point = (p, time_offset) => {
@@ -233,18 +269,16 @@ client.draw_sprite = (sp, time_offset) => {
 	virtue.drawImage(client.sprites[sp.varname], x - client.sprites[sp.varname].width / 2, y - client.sprites[sp.varname].height / 2);
 };
 
-client.draw_line = (li, time_offset) => {
-	let x1 = li.x1 + li.speedx * time_offset / 1000;
-	let y1 = li.y1 + li.speedy * time_offset / 1000;
-	let x2 = li.x2 + li.speedx * time_offset / 1000;
-	let y2 = li.y2 + li.speedy * time_offset / 1000;
-
-	virtue.strokeStyle = li.colour;
-	virtue.beginPath();
-	virtue.moveTo(x1, y1);
-	virtue.lineTo(x2, y2);
-	virtue.stroke();
+client.draw_text = (t, time_offset) => {
+	let x = Math.floor(t.x + t.speedx * time_offset / 1000);
+	let y = Math.floor(t.y + t.size / 2 + t.speedy * time_offset / 1000);
+	virtue.fillStyle = t.colour;
+	virtue.textAlign = "center";
+	virtue.font = t.size.toString() + "px " + t.font;
+	virtue.fillText(t.text, x, y);
 };
+
+// ------------------------------------------------------------------------------------------------------------------------
 
 client.draw = () => {
 
@@ -255,31 +289,27 @@ client.draw = () => {
 	// been since we received info about it. This is done with this "time_offset" let.
 
 	let time_offset = Date.now() - client.last_frame_time;
-
-	// Cache various things for "speed" reasons (probably pointless).
-
-	let all_things = client.all_things;
-	let len = all_things.length;
-
-	let draw_point = client.draw_point;
-	let draw_sprite = client.draw_sprite;
-	let draw_line = client.draw_line;
-	let draw_text = client.draw_text;
+	let len = client.all_things.length;
 
 	for (let n = 0; n < len; n++) {
 
-		switch (all_things[n].type) {
+		let thing = client.all_things[n];
+
+		switch (thing.type) {
+		case "f":
+			client.draw_frect(thing, time_offset);
+			break;
 		case "l":
-			draw_line(all_things[n], time_offset);
+			client.draw_line(thing, time_offset);
 			break;
 		case "p":
-			draw_point(all_things[n], time_offset);
+			client.draw_point(thing, time_offset);
 			break;
 		case "s":
-			draw_sprite(all_things[n], time_offset);
+			client.draw_sprite(thing, time_offset);
 			break;
 		case "t":
-			draw_text(all_things[n], time_offset);
+			client.draw_text(thing, time_offset);
 			break;
 		}
 	}

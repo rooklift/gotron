@@ -70,6 +70,14 @@ func (w *Canvas) AddLine(colour string, x1, y1, x2, y2, speedx, speedy float64) 
 	w.entities = append(w.entities, fmt.Sprintf("l\x1f%s\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f", colour, x1, y1, x2, y2, speedx * eng.fps, speedy * eng.fps))
 }
 
+func (w *Canvas) AddFrect(colour string, x1, y1, x2, y2, speedx, speedy float64) {
+
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	w.entities = append(w.entities, fmt.Sprintf("f\x1f%s\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f", colour, x1, y1, x2, y2, speedx * eng.fps, speedy * eng.fps))
+}
+
 func (w *Canvas) AddText(text, colour string, size int, font string, x, y, speedx, speedy float64) {
 
 	w.mutex.Lock()
