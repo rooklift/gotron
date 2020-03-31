@@ -65,7 +65,7 @@ scanner.on("line", (line) => {
 
 	if (frame_type === "v") {
 
-		// Deal with visual frames.................................................................
+		// Deal with visual frames...
 
 		client.all_things.length = 0;         // Clear our list of drawables.
 
@@ -75,141 +75,136 @@ scanner.on("line", (line) => {
 
 		for (let n = 1; n < len; n++) {
 
-			switch (stuff[n].charAt(0)) {
+			let elements = stuff[n].split(UNIT_SEP);
+
+			switch (elements[0]) {
 
 			case "l":
-				client.parse_line(stuff[n]);
+				client.parse_line(elements);
 				break;
 			case "p":
+				client.parse_point(elements);
+				break;
 			case "s":
-				client.parse_point_or_sprite(stuff[n]);
+				client.parse_sprite(elements);
 				break;
 			case "t":
-				client.parse_text(stuff[n]);
+				client.parse_text(elements);
 				break;
 			}
 		}
 
 	} else if (frame_type === "a") {
 
-		// Deal with audio events..................................................................
+		// Deal with audio events...
 
 		for (let n = 1; n < len; n++) {
-			client.play_multi_sound(stuff[n]);
+			let filename = stuff[n];
+			client.play_multi_sound(filename);
 		}
 
 	} else if (frame_type === "d") {
 
-		// Debug messages..........................................................................
+		// Debug messages...
 
 		if (len > 0) {
-			client.display_debug_message(stuff[1]);
+			let msg = stuff[1];
+			client.display_debug_message(msg);
 		}
 
 	} else if (frame_type === "r") {
 
-		// Register sprites........................................................................
+		// Register sprites...
 
 		if (len > 1) {
-			client.register_sprite(stuff[1]);
+			let elements = stuff[1].split(UNIT_SEP);
+			client.register_sprite(elements);
 		}
 
 	} else if (frame_type === "s") {
 
-		// Register sounds.........................................................................
+		// Register sounds...
 
 		if (len > 1) {
-			client.register_sound(stuff[1]);
+			let elements = stuff[1].split(UNIT_SEP);
+			client.register_sound(elements);
 		}
 	}
 });
 
-// Parsers for individual blobs in a message...
+// ------------------------------------------------------------------------------------------------------------------------
 
-client.register_sprite = (blob) => {
-
-	let elements = blob.split(UNIT_SEP);
-
-	let filename = elements[0];
-	let varname = elements[1];
-
-	client.sprites[varname] = new Image();
-	client.sprites[varname].src = filename;
+client.parse_point = (elements) => {
+	client.all_things.push({
+		type:		elements[0],
+		colour:		elements[1],
+		x:			parseFloat(elements[2]),
+		y:			parseFloat(elements[3]),
+		speedx:		parseFloat(elements[4]),
+		speedy:		parseFloat(elements[5]),
+	});
 }
 
-client.register_sound = (blob) => {
-
-	let elements = blob.split(UNIT_SEP);
-
-	let filename = elements[0];
-	let varname = elements[1];
-
-	client.sounds[varname] = new Audio();
-	client.sounds[varname].src = filename;
-}
-
-client.parse_point_or_sprite = (blob) => {
-
-	let elements = blob.split(UNIT_SEP);
-
-	let thing = {};
-
-	thing.type = elements[0];
-
-	if (thing.type === "p") {
-		thing.colour = elements[1];
-	} else if (thing.type === "s") {
-		thing.varname = elements[1];
-	}
-
-	thing.x = parseFloat(elements[2]);
-	thing.y = parseFloat(elements[3]);
-	thing.speedx = parseFloat(elements[4]);
-	thing.speedy = parseFloat(elements[5]);
-
-	client.all_things.push(thing);
+client.parse_sprite = (elements) => {
+	client.all_things.push({
+		type:		elements[0],
+		varname:	elements[1],
+		x:			parseFloat(elements[2]),
+		y:			parseFloat(elements[3]),
+		speedx:		parseFloat(elements[4]),
+		speedy:		parseFloat(elements[5]),
+	});
 };
 
-client.parse_line = (blob) => {
-
-	let elements = blob.split(UNIT_SEP);
-
-	let thing = {};
-
-	thing.type = elements[0];
-	thing.colour = elements[1];
-	thing.x1 = parseFloat(elements[2]);
-	thing.y1 = parseFloat(elements[3]);
-	thing.x2 = parseFloat(elements[4]);
-	thing.y2 = parseFloat(elements[5]);
-	thing.speedx = parseFloat(elements[6]);
-	thing.speedy = parseFloat(elements[7]);
-
-	client.all_things.push(thing);
+client.parse_line = (elements) => {
+	client.all_things.push({
+		type:		elements[0],
+		colour:		elements[1],
+		x1:			parseFloat(elements[2]),
+		y1:			parseFloat(elements[3]),
+		x2:			parseFloat(elements[4]),
+		y2:			parseFloat(elements[5]),
+		speedx:		parseFloat(elements[6]),
+		speedy:		parseFloat(elements[7]),
+	});
 };
 
-client.parse_text = (blob) => {
-
-	let elements = blob.split(UNIT_SEP);
+client.parse_text = (elements) => {
 
 	if (elements.length < 9) {
 		return;
 	}
 
-	let thing = {};
-
-	thing.type = elements[0];
-	thing.colour = elements[1];
-	thing.size =  parseFloat(elements[2]);
-	thing.font = elements[3];
-	thing.x = parseFloat(elements[4]);
-	thing.y = parseFloat(elements[5]);
-	thing.speedx = parseFloat(elements[6]);
-	thing.speedy = parseFloat(elements[7]);
-	thing.text = elements[8];
-
-	client.all_things.push(thing);
+	client.all_things.push({
+		type:		elements[0],
+		colour:		elements[1],
+		size:		parseFloat(elements[2]),
+		font:		elements[3],
+		x:			parseFloat(elements[4]),
+		y:			parseFloat(elements[5]),
+		speedx:		parseFloat(elements[6]),
+		speedy:		parseFloat(elements[7]),
+		text:		elements[8]
+	});
 };
+
+// ------------------------------------------------------------------------------------------------------------------------
+
+client.register_sprite = (elements) => {
+	let filename = elements[0];
+	let varname = elements[1];
+	client.sprites[varname] = new Image();
+	client.sprites[varname].src = filename;
+};
+
+client.register_sound = (elements) => {
+	let filename = elements[0];
+	let varname = elements[1];
+	client.sounds[varname] = new Audio();
+	client.sounds[varname].src = filename;
+};
+
+// ------------------------------------------------------------------------------------------------------------------------
 
 client.draw_text = (t, time_offset) => {
 	let x = Math.floor(t.x + t.speedx * time_offset / 1000);
