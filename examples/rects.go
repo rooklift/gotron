@@ -31,7 +31,9 @@ func main() {
 				} else {
 					col = "black"
 				}
-				c.AddFrect(col, x, y, x + SIZE, y + SIZE, 0, 0)
+
+				c.AddPolygon(col, []float64{x, y, x + SIZE, y, x + SIZE, y + SIZE}, 0, 0)
+				// c.AddFrect(col, x, y, x + SIZE, y + SIZE, 0, 0)
 			}
 		}
 
