@@ -78,6 +78,22 @@ func (w *Canvas) AddFrect(colour string, x1, y1, x2, y2, speedx, speedy float64)
 	w.entities = append(w.entities, fmt.Sprintf("f\x1f%s\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f\x1f%.1f", colour, x1, y1, x2, y2, speedx * eng.fps, speedy * eng.fps))
 }
 
+func (w *Canvas) AddPolygon(colour string, points []float64, speedx, speedy float64) {
+
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	var point_strings []string
+
+	for _, c := range points {
+		point_strings = append(point_strings, fmt.Sprintf("%.1f", c))
+	}
+
+	point_strings_joined := strings.Join(point_strings, "\x1f")
+
+	w.entities = append(w.entities, fmt.Sprintf("po\x1f%s\x1f%s\x1f%.1f\x1f%.1f", colour, point_strings_joined, speedx * eng.fps, speedy * eng.fps))
+}
+
 func (w *Canvas) AddText(text, colour string, size int, font string, x, y, speedx, speedy float64) {
 
 	w.mutex.Lock()

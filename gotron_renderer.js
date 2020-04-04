@@ -41,7 +41,6 @@ client.iteration = 0;
 client.sprites = {};
 client.sounds = {};
 client.all_things = [];
-client.second_last_frame_time = Date.now() - 16;
 client.last_frame_time = Date.now();
 
 client.go = child_process.spawn(config.executable);
@@ -70,7 +69,6 @@ scanner.on("line", (line) => {
 		client.all_things.length = 0;         // Clear our list of drawables.
 
 		client.go_frames += 1;
-		client.second_last_frame_time = client.last_frame_time;
 		client.last_frame_time = Date.now();
 
 		for (let n = 1; n < len; n++) {
@@ -87,6 +85,9 @@ scanner.on("line", (line) => {
 				break;
 			case "p":
 				client.parse_point(elements);
+				break;
+			case "po":
+				client.parse_polygon(elements);
 				break;
 			case "s":
 				client.parse_sprite(elements);
@@ -182,7 +183,24 @@ client.parse_point = (elements) => {
 		speedx:		parseFloat(elements[4]),
 		speedy:		parseFloat(elements[5]),
 	});
-}
+};
+
+client.parse_polygon = (elements) => {
+
+	let thing = {
+		type:		elements[0],
+		colour:		elements[1]
+	};
+
+	thing.speedx = elements[elements.length - 2];
+	thing.speedy = elements[elements.length - 1];
+
+	thing.points = elements.slice(2, elements.length - 2)
+
+	if (thing.points.length > 2 && thing.points.length % 2 === 0) {
+		client.all_things.push(thing);
+	}
+};
 
 client.parse_sprite = (elements) => {
 	client.all_things.push({
@@ -244,8 +262,11 @@ client.draw_frect = (r, time_offset) => {
 	let width = r.x2 - r.x1;
 	let height = r.y2 - r.y1;
 
+	let x1 = r.x1 + r.speedx * time_offset / 1000;
+	let y1 = r.y1 + r.speedy * time_offset / 1000;
+
 	virtue.fillStyle = r.colour;
-	virtue.fillRect(r.x1, r.y1, width, height); 
+	virtue.fillRect(x1, y1, width, height); 
 }
 
 client.draw_line = (li, time_offset) => {
@@ -266,6 +287,26 @@ client.draw_point = (p, time_offset) => {
 	let y = Math.floor(p.y + p.speedy * time_offset / 1000);
 	virtue.fillStyle = p.colour;
 	virtue.fillRect(x, y, 1, 1);
+};
+
+client.draw_polygon = (p, time_offset) => {
+
+	let x_offset = p.speedx * time_offset / 1000;
+	let y_offset = p.speedy * time_offset / 1000;
+
+	console.log(p);
+
+	virtue.fillStyle = p.colour;
+
+	virtue.beginPath();
+	virtue.moveTo(p.points[0] + x_offset, p.points[1] + y_offset);
+
+	for (let n = 2; n < p.points.length; n += 2) {
+		virtue.lineTo(p.points[n] + x_offset, p.points[n + 1] + y_offset);
+	}
+
+	virtue.closePath();
+	virtue.fill();
 };
 
 client.draw_sprite = (sp, time_offset) => {
@@ -314,6 +355,9 @@ client.draw = () => {
 			break;
 		case "p":
 			client.draw_point(thing, time_offset);
+			break;
+		case "po":
+			client.draw_polygon(thing, time_offset);
 			break;
 		case "s":
 			client.draw_sprite(thing, time_offset);
